@@ -24,7 +24,7 @@ class Env2048(gym.Env):
         self.action_space = spaces.Discrete(4)
         # 4x4 grid with 16bit onehot encoding
         self.board = np.zeros((4, 4), dtype=np.uint16)
-        self.reward = 0
+        self.score = 0
         self.observation_space = spaces.MultiBinary(256)
         self.window_size = 512
         self.render_mode = render_mode
@@ -60,21 +60,19 @@ class Env2048(gym.Env):
         return observation, info
 
     def step(self, action):
-        self.action_to_merge(action)
-        # We use `np.clip` to make sure we don't leave the grid
-        self._agent_location = np.clip(
-            self._agent_location + direction, 0, self.size - 1
-        )
-        # An episode is done iff the agent has reached the target
-        terminated = np.array_equal(self._agent_location, self._target_location)
-        reward = 1 if terminated else 0  # Binary sparse rewards
-        observation = self._get_obs()
-        info = self._get_info()
+        new_board, reward = self.action_to_merge(action)
+        if not np.array_equal(self.board, new_board):
+            self.add_random_tile()
+            self.board = new_board
 
-        if self.render_mode == "human":
+        self.score += reward
+        observation = self.get_obs()
+        info = self.get_info()
+
+        if self.render_mode == 'human':
             self._render_frame()
 
-        return observation, reward, terminated, False, info
+        return observation, reward, self.game_over, False, info
 
     def action_to_merge(self, action):
         if action == 0:
@@ -87,9 +85,18 @@ class Env2048(gym.Env):
             new_board, reward = merge_up(self.board)
         else:
             raise ValueError('invalid action')
-        if not np.array_equal(self.board, new_board):
-            self.add_random_tile()
-        return reward
+        return new_board, reward
+
+    @property
+    def game_over(self) -> bool:
+        if np.any(self.board == 0):
+            return True
+        for action in Actions:
+            new_board, _ = self.action_to_merge(action.value)
+            if not np.array_equal(self.board, new_board):
+                return True
+        return False
+
 
     def render(self):
         if self.render_mode == 'rgb_array':
