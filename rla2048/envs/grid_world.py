@@ -21,6 +21,7 @@ class Env2048(gym.Env):
         self.action_space = spaces.Discrete(4)
         # 4x4 grid with 16bit onehot encoding
         self.board = np.zeros((4, 4), dtype=np.uint16)
+        self.score = 0
         self.observation_space = spaces.MultiBinary(256)
         self._action_to_merge = {
             Actions.left.value: np.array([-1, 0]),
@@ -44,16 +45,9 @@ class Env2048(gym.Env):
         obs[rs, cs, one_hot] = 1
         return obs.flatten()
 
-    def _get_obs(self):
-        one_hot = np.zeros((4, 4, 16))
-        return {"agent": self._agent_location, "target": self._target_location}
 
-    def _get_info(self):
-        return {
-            "distance": np.linalg.norm(
-                self._agent_location - self._target_location, ord=1
-            )
-        }
+    def get_info(self):
+        return {'score': self.score}
 
     def reset(self, seed=None, options=None):
         # We need the following line to seed self.np_random
