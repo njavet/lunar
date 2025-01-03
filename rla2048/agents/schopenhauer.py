@@ -39,10 +39,10 @@ class SchopenhauerAgent(ABC):
         done = term or trunc
         return ts, done
 
-    def process_step(self):
+    def process_step(self, record=False):
         pass
 
-    def generate_trajectory(self, policy='optimal'):
+    def generate_trajectory(self, policy='optimal', record=False):
         self.reset_trajectory()
         state, info = self.env.reset()
         terminated = False
@@ -51,7 +51,7 @@ class SchopenhauerAgent(ABC):
             ts, terminated = self.exec_step(state, action)
             self.trajectory.steps.append(ts)
             # the agent might want to do something after each step
-            self.process_step()
+            self.process_step(record)
             state = ts.next_state
 
     def process_trajectory(self, episode):

@@ -26,6 +26,13 @@ class DQLAgent(SchopenhauerAgent):
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
         self.criterion = nn.MSELoss()
         self.trajectories = defaultdict(list)
+        self.images = None
+
+    def optimal_policy(self, state: np.ndarray) -> int:
+        state = torch.FloatTensor(state).unsqueeze(0)
+        with torch.no_grad():
+            q_values = self.model(state)
+        return torch.argmax(q_values).item()
 
     def behave_policy(self, state: np.ndarray) -> int:
         if np.random.rand() <= self.epsilon:
@@ -80,7 +87,11 @@ class DQLAgent(SchopenhauerAgent):
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
-    def process_step(self):
+    def process_step(self, record=False):
+        if record:
+            img = self.env.render()
+            self.images.append(img)
+
         self.replay()
         if len(self.trajectory.steps) % self.update_target_steps == 0:
             self.update_target_model()
@@ -95,3 +106,8 @@ class DQLAgent(SchopenhauerAgent):
             self.generate_trajectory(policy='behave')
             self.trajectories[n] = self.trajectory
             self.process_trajectory(n)
+
+    def record_video(self):
+        self.images = []
+        self.generate_trajectory(record=True)
+
