@@ -21,9 +21,9 @@ class DQLAgent(SchopenhauerAgent):
         self.epsilon_decay = params.decay
         self.epsilon_min = params.epsilon_min
         self.batch_size = params.batch_size
-        self.update_target_steps = 10
+        self.update_target_steps = 16
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
-        self.criterion = nn.MSELoss()
+        self.criterion = nn.CrossEntropyLoss()
         self.trajectories = defaultdict(list)
         self.images = None
 
