@@ -30,22 +30,22 @@ def merge_left(board: np.ndarray) -> tuple[np.ndarray, float]:
     return np.array(new_board, dtype=np.uint16), reward
 
 
-def merge_right(board):
-    new_board = np.fliplr(board)
-    new_board, reward = merge_left(new_board)
-    new_board = np.fliplr(new_board)
+def merge_right(board: np.ndarray) -> tuple[np.ndarray, float]:
+    flipped = np.fliplr(board)
+    left_flipped, reward = merge_left(flipped)
+    new_board = np.fliplr(left_flipped)
     return new_board, reward
 
 
-def merge_down(board):
-    new_board = np.rot90(board, -1)
-    new_board, reward = merge_left(new_board)
-    new_board = np.rot90(new_board)
+def merge_down(board: np.ndarray) -> tuple[np.ndarray, float]:
+    rotated = np.rot90(board, -1)
+    left_rotated, reward = merge_left(rotated)
+    new_board = np.rot90(left_rotated)
     return new_board, reward
 
 
-def merge_up(board):
-    new_board = np.rot90(board)
-    new_board, reward = merge_left(new_board)
-    new_board = np.rot90(new_board, -1)
+def merge_up(board: np.ndarray) -> tuple[np.ndarray, float]:
+    rotated = np.rot90(board)
+    left_rotated, reward = merge_left(rotated)
+    new_board = np.rot90(left_rotated, -1)
     return new_board, reward
