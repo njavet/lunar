@@ -130,7 +130,7 @@ class Env2048(gym.Env):
         for i, row in enumerate(self.board):
             for j, cell in enumerate(row):
                 cell = int(cell)
-                color = config.TILE_COLORS.get(cell, config.TILE_COLORS[2048])
+                color = config.TILE_COLORS.get(cell, config.TILE_COLORS[4096])
                 # different coordinate system
                 x = config.GAP_SIZE + j * cell_size
                 y = config.GAP_SIZE + i * cell_size
@@ -140,9 +140,12 @@ class Env2048(gym.Env):
                                  rect=rect,
                                  border_radius=10)
                 if cell != 0:
-                    text_surface = font.render(str(cell), True, config.FONT_COLOR)
-                    text_rect = text_surface.get_rect(center=(x + config.TILE_SIZE // 2,
-                                                              y + config.TILE_SIZE // 2))
+                    text_surface = font.render(str(cell),
+                                               True,
+                                               config.FONT_COLOR)
+                    text_rect = text_surface.get_rect(center=(
+                        x + config.TILE_SIZE // 2,
+                        y + config.TILE_SIZE // 2))
                     canvas.blit(text_surface, text_rect)
 
         for x in range(5):
@@ -162,12 +165,14 @@ class Env2048(gym.Env):
             )
 
         if self.render_mode == 'human':
-            # The following line copies our drawings from `canvas` to the visible window
+            # The following line copies our drawings from `canvas`
+            # to the visible window
             self.window.blit(canvas, canvas.get_rect())
             pygame.event.pump()
             pygame.display.update()
 
-            # We need to ensure that human-rendering occurs at the predefined framerate.
+            # We need to ensure that human-rendering occurs at the
+            # predefined framerate.
             # The following line will automatically add a delay to
             # keep the framerate stable.
             self.clock.tick(self.metadata['render_fps'])
