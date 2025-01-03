@@ -1,68 +1,77 @@
 import numpy as np
 
 
-def max_tile_heuristic(board: np.array) -> int:
-    return int(np.log2(np.max(board)))
+def max_tile_heuristic(board: np.array) -> float:
+    return -1 / np.max(board)
 
 
-def zero_tile_heuristic(board: np.array) -> int:
-    return 16 - np.count_nonzero(board)
+def zero_tile_heuristic(board: np.array) -> float:
+    return np.count_nonzero(board) / 16
 
 
 def smoothness_heuristic(board: np.array) -> float:
-    smoothness = 0
-
+    distances = 0
     for row in board:
         for i in range(3):
             if row[i] > 0 and row[i + 1] > 0:
-                smoothness += abs(row[i] - row[i + 1])
-
+                distances += abs(row[i] - row[i + 1])
     for col in board.transpose():
         for i in range(3):
             if col[i] > 0 and col[i + 1] > 0:
-                smoothness += abs(col[i] - col[i + 1])
-    return smoothness
+                distances += abs(col[i] - col[i + 1])
+    return 1 / distances
 
 
-def monotonicity_heuristic(grid: np.ndarray) -> float:
+def monotonicity_heuristic(board: np.ndarray) -> float:
     monotonicity = 0
 
-    def calculate_monotonicity(array):
-        increasing, decreasing = 0, 0
-        for i in range(len(array) - 1):
-            if array[i] >= array[i + 1]:
-                decreasing += array[i] - array[i + 1]
-            elif array[i] <= array[i + 1]:
-                increasing += array[i + 1] - array[i]
-            return increasing, decreasing
+    def calculate_inc(array):
+        if np.all([array[i] <= array[i + 1] for i in range(len(array) - 1)]):
+            return 1
+        else:
+            return 0
+    def calculate_dec(array):
+        if np.all([array[i] >= array[i + 1] for i in range(len(array) - 1)]):
+            return 1
+        else:
+            return 0
 
-    # Calculate monotonicity for rows
-    for row in grid:
-        monotonicity += min(calculate_monotonicity(row))
+    for row in board:
+        monotonicity += calculate_inc(row)
+        monotonicity += calculate_dec(row)
+    for col in board.transpose():
+        monotonicity += calculate_inc(col)
+        monotonicity += calculate_dec(col)
+    try:
+        mon_norm = -1 / monotonicity
+    except ZeroDivisionError:
+        mon_norm = -1
 
-    # Calculate monotonicity for columns
-    monotonicity += calculate_monotonicity(grid.transpose()[0])[1] * 10
-    for col in grid.transpose()[1:]:
-        monotonicity += min(calculate_monotonicity(col))
-    return monotonicity
-
-
-def corner_heuristic(board: np.array) -> int:
-    weights = np.array([[8, 0, 0, 0],
-                        [3, -1, -1, -1],
-                        [2, -1, -1, -1],
-                        [1, 1, -1, -1]])
-    return int(np.sum(board * weights))
+    return mon_norm
 
 
-def utility(self, grid: np.array) -> float:
-    max_tile = self.max_tile_heuristic(grid)
-    zeros = self.zero_tile_heuristic(grid)
-    smooth = self.smoothness_heuristic(grid)
-    mono = self.monotonicity_heuristic(grid)
-    corner = self.corner_heuristic(grid)
+def corner_heuristic(board: np.array) -> float:
+    weights = np.array([[1, 0, 0, 1],
+                        [0, 0, 0, 0],
+                        [0, 0, 0, 0],
+                        [1, 0, 0, 1]])
+    try:
+        corn = -1 / np.sum(board * weights)
+    except ZeroDivisionError:
+        corn = -1
+    return corn
 
-    return mono + corner + zeros + max_tile + smooth
+
+def utility(grid: np.ndarray, weights: np.ndarray = None) -> float:
+    if weights is None:
+        weights = np.ones(5)
+    max_tile = max_tile_heuristic(grid)
+    zeros = zero_tile_heuristic(grid)
+    smooth = smoothness_heuristic(grid)
+    mono = monotonicity_heuristic(grid)
+    corner = corner_heuristic(grid)
+    res = weights * np.array([max_tile, zeros, smooth, mono, corner])
+    return np.sum(res)
 
 
 def old_utility(board: np.array) -> float:
