@@ -18,7 +18,7 @@ class Actions(Enum):
 
 
 class Env2048(gym.Env):
-    metadata = {'render_modes': ['human', 'rgb_array', 'rgb_array_list'],
+    metadata = {'render_modes': ['human', 'rgb_array', 'rgb_array_list', 'ansi'],
                 'render_fps': 4}
 
     def __init__(self, render_mode=None):
@@ -72,6 +72,9 @@ class Env2048(gym.Env):
 
         if self.render_mode == 'human':
             self._render_frame()
+        if self.render_mode == 'ansi':
+            print('step', 5)
+            self.render_ansi()
 
         return observation, reward, self.game_over, False, info
 
@@ -95,12 +98,17 @@ class Env2048(gym.Env):
         for action in Actions:
             new_board, _ = self.action_to_merge(action.value)
             if not np.array_equal(self.board, new_board):
-                return True
-        return False
+                return False
+        return True
 
     def render(self):
         if self.render_mode == 'rgb_array':
             return self._render_frame()
+
+    def render_ansi(self):
+        for i, row in enumerate(self.board):
+            r = ' | '.join([str(cell) for cell in row])
+            print(r)
 
     def _render_frame(self):
         if self.window is None and self.render_mode == 'human':
