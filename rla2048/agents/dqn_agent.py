@@ -3,27 +3,36 @@ import random
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from collections import deque
+from collections import deque, defaultdict
 
 # project imports
-from rla2048.schemas import Trajectory, TrajectoryStep
+from rla2048.agents.schopenhauer import SchopenhauerAgent
 
 
-class DQLAgent:
-    def __init__(self):
+class DQLAgent(SchopenhauerAgent):
+    def __init__(self, env, params):
+        super().__init__(env, params)
         self.model = self.create_model()
         self.target_model = self.create_model()
         self.target_model.load_state_dict(self.model.state_dict())
         self.memory = deque(maxlen=2000)
-        self.gamma = 0.95
-        self.epsilon = 1.0
-        self.epsilon_decay = 0.995
-        self.epsilon_min = 0.1
-        self.batch_size = 64
+        self.gamma = params.gamma
+        self.epsilon = params.epsilon
+        self.epsilon_decay = params.decay
+        self.epsilon_min = params.epsilon_min
+        self.batch_size = params.batch_size
         self.update_target_steps = 10
-        self.steps = 0
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
         self.criterion = nn.MSELoss()
+        self.trajectories = defaultdict(list)
+
+    def behave_policy(self, state: np.ndarray) -> int:
+        if np.random.rand() <= self.epsilon:
+            return self.env.action_space.sample()
+        state = torch.FloatTensor(state).unsqueeze(0)
+        with torch.no_grad():
+            q_values = self.model(state)
+        return torch.argmax(q_values).item()
 
     @staticmethod
     def create_model():
@@ -36,14 +45,6 @@ class DQLAgent:
 
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
-
-    def act(self, state):
-        if np.random.rand() <= self.epsilon:
-            return random.randint(0, 3)
-        state = torch.FloatTensor(state).unsqueeze(0)
-        with torch.no_grad():
-            q_values = self.model(state)
-        return torch.argmax(q_values).item()
 
     def replay(self):
         if len(self.memory) < self.batch_size:
@@ -77,3 +78,18 @@ class DQLAgent:
     def decay_epsilon(self):
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
+
+    def process_step(self):
+        self.replay()
+        if len(self.trajectory.steps) % self.update_target_steps == 0:
+            self.update_target_model()
+
+    def process_trajectory(self, episode):
+        self.decay_epsilon()
+        print('total reward:', sum([ts.reward for ts in self.trajectory.steps]))
+
+    def learn(self):
+        for n in range(self.params.n_episodes):
+            self.generate_trajectory(policy='behave')
+            self.trajectories[n] = self.trajectory
+            self.process_trajectory(n)

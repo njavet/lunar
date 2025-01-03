@@ -57,7 +57,7 @@ class Env2048(gym.Env):
         if self.render_mode == 'human':
             self._render_frame()
 
-        return observation, False, info
+        return observation, info
 
     def step(self, action):
         new_board, reward = self.action_to_merge(action)
@@ -84,7 +84,7 @@ class Env2048(gym.Env):
         elif action == 3:
             new_board, reward = merge_up(self.board)
         else:
-            raise ValueError('invalid action')
+            raise ValueError(f'invalid action: {action}')
         return new_board, reward
 
     @property
@@ -115,16 +115,22 @@ class Env2048(gym.Env):
         pix_square_size = (
             self.window_size / 4
         )
-
+        font = pygame.font.Font(None, 55)
         for i, row in enumerate(self.board):
             for j, cell in enumerate(row):
                 rect = pygame.Rect(pix_square_size * i,
                                    pix_square_size * j,
                                    pix_square_size,
                                    pix_square_size)
+                color = self.tile_colors.get(value, )
+                if cell != 0:
+                    text_surface = font.render(str(value), True, FONT_COLOR)
+                text_rect = text_surface.get_rect(center=(x + TILE_SIZE // 2, y + TILE_SIZE // 2))
+                screen.blit(text_surface, text_rect)
                 pygame.draw.rect(canvas,
                                  color=(255, 0, 0),
-                                 rect=rect)
+                                 rect=rect,
+                                 border_radius=10)
 
         for x in range(5):
             pygame.draw.line(

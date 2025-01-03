@@ -1,8 +1,15 @@
 import gymnasium as gym
+import torch
+
+# project imports
+from rla2048.agents.dqn_agent import DQLAgent
+from rla2048.schemas import get_default_params
 
 
-def get_env(params):
-    env = gym.make('Game2048-v0', render_mode='human')
-    params.state_size = env.observation_space.n
-    params.action_size = env.action_space.n
-    return env
+def train():
+    env = gym.make('rla2048/Game2048-v0', render_mode='human')
+    params = get_default_params()
+    agent = DQLAgent(env, params)
+    agent.learn()
+    torch.save(agent.model.state_dict(), 'dql_2048.pth')
+

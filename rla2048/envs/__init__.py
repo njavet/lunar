@@ -1,1 +1,1 @@
-from .envs.env2048 import Env2048
+from .env2048 import Env2048

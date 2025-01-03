@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+import numpy as np
 from pathlib import Path
 
 
@@ -11,14 +12,19 @@ class Params(BaseModel):
     epsilon_min: float
     decay: float
     seed: int
+    batch_size: int
+    update_target_steps: int
     savefig_folder: Path
 
 
 class TrajectoryStep(BaseModel):
-    state: int
+    state: np.ndarray
     action: int
     reward: float
-    next_state: int
+    next_state: np.ndarray
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class Trajectory(BaseModel):
@@ -34,5 +40,7 @@ def get_default_params():
                     epsilon_min=0.05,
                     decay=0.99,
                     seed=0x101,
+                    batch_size=64,
+                    update_target_steps=10,
                     savefig_folder=Path('images'))
     return params

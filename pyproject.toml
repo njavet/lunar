@@ -19,3 +19,6 @@ seaborn = "^0.13.2"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+train = "rla2048.play:train"

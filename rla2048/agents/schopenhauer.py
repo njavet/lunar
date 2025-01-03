@@ -1,8 +1,9 @@
 from abc import ABC
 import numpy as np
+import gymnasium as gym
 
 # project imports
-from rla2048.schemas import Trajectory, TrajectoryStep
+from rla2048.schemas import Trajectory, TrajectoryStep, Params
 
 
 class SchopenhauerAgent(ABC):
@@ -12,7 +13,7 @@ class SchopenhauerAgent(ABC):
     only inside the agent. Another type would be a Cartesian Agent that is
     part of the environment. The third Agent type would be a mix of both.
     """
-    def __init__(self, env, params):
+    def __init__(self, env: gym.Env, params: Params):
         """ params could be seen as given by nature / god """
         self.env = env
         self.params = params
@@ -43,9 +44,10 @@ class SchopenhauerAgent(ABC):
 
     def generate_trajectory(self, policy='optimal'):
         self.reset_trajectory()
-        state, terminated, info = self.env.reset()
+        state, info = self.env.reset()
+        terminated = False
         while not terminated:
-            action = self.policies[policy]
+            action = self.policies[policy](state)
             ts, terminated = self.exec_step(state, action)
             self.trajectory.steps.append(ts)
             # the agent might want to do something after each step
