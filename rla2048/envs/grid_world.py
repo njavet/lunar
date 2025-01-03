@@ -111,29 +111,22 @@ class Env2048(gym.Env):
 
         canvas = pygame.Surface((self.window_size, self.window_size))
         canvas.fill((255, 255, 255))
+        # The size of a single grid square in pixels
         pix_square_size = (
-            self.window_size / self.size
-        )  # The size of a single grid square in pixels
-
-        # First we draw the target
-        pygame.draw.rect(
-            canvas,
-            (255, 0, 0),
-            pygame.Rect(
-                pix_square_size * self._target_location,
-                (pix_square_size, pix_square_size),
-            ),
-        )
-        # Now we draw the agent
-        pygame.draw.circle(
-            canvas,
-            (0, 0, 255),
-            (self._agent_location + 0.5) * pix_square_size,
-            pix_square_size / 3,
+            self.window_size / 4
         )
 
-        # Finally, add some gridlines
-        for x in range(self.size + 1):
+        for i, row in enumerate(self.board):
+            for j, cell in enumerate(row):
+                rect = pygame.Rect(pix_square_size * i,
+                                   pix_square_size * j,
+                                   pix_square_size,
+                                   pix_square_size)
+                pygame.draw.rect(canvas,
+                                 color=(255, 0, 0),
+                                 rect=rect)
+
+        for x in range(5):
             pygame.draw.line(
                 canvas,
                 0,
