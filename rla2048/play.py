@@ -10,12 +10,12 @@ from rla2048.schemas import Params
 
 def get_default_params():
     params = Params(n_runs=32,
-                    n_episodes=4024,
+                    n_episodes=16192,
                     alpha=0.1,
                     gamma=0.99,
                     epsilon=1,
                     epsilon_min=0.05,
-                    decay=0.99999999,
+                    decay=0.9998,
                     seed=0x101,
                     batch_size=64,
                     update_target_steps=10,

@@ -109,14 +109,14 @@ class DQLAgent(SchopenhauerAgent):
         st = st.reshape((4, 4, 16))
         inds = np.argwhere(st == 1)
         st = np.exp2(inds).astype(np.int32)
-        self.max_tiles.append(np.max(st))
         tr = sum([ts.reward for ts in self.trajectory.steps])
+        self.max_tiles.append((np.max(st), tr))
         self.total_rewards.append(tr)
-        print(f'episode {episode} with epsilon: {self.epsilon}')
-        print(f'Total steps {len(self.trajectory.steps)}')
-        print(f'Highest tile {np.max(st)}')
-        print(f'total reward: {tr}')
-        print(64*'-')
+        if episode % 100 == 0:
+            print(f'episode {episode} with epsilon: {self.epsilon}')
+            so = sorted(self.max_tiles, reverse=True)[0]
+            print(f'Highest tile: {int(so[0])}, highest reward: {so[1]}')
+            print(64*'-')
 
     def learn(self):
         self.max_tiles = []
