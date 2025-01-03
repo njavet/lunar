@@ -91,14 +91,18 @@ class DQLAgent(SchopenhauerAgent):
         if record:
             img = self.env.render()
             self.images.append(img)
-
         self.replay()
         if len(self.trajectory.steps) % self.update_target_steps == 0:
             self.update_target_model()
-        print('score', self.trajectory.steps[-1].reward)
 
     def process_trajectory(self, episode):
         self.decay_epsilon()
+        st = self.trajectory.steps[-1].next_state
+        st = st.reshape((4, 4, 16))
+        st = np.exp2(st[:, :]).reshape((4, 4))
+
+        print(f'Total steps {len(self.trajectory.steps)}')
+        print(f'Highest tile {max(st)}')
         print('total reward:', sum([ts.reward for ts in self.trajectory.steps]))
 
     def learn(self):
