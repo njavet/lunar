@@ -44,15 +44,13 @@ class DQLAgent(SchopenhauerAgent):
 
     @staticmethod
     def create_model():
-        model = nn.Sequential(nn.Linear(256, 128),
+        model = nn.Sequential(nn.Linear(256, 512),
                               nn.ReLU(),
-                              nn.Linear(128, 128),
+                              nn.Linear(512, 256),
                               nn.ReLU(),
-                              nn.Linear(128, 64),
+                              nn.Linear(256, 128),
                               nn.ReLU(),
-                              nn.Linear(64, 32),
-                              nn.ReLU(),
-                              nn.Linear(32, 4))
+                              nn.Linear(128, 4))
         return model
 
     def remember(self, state, action, reward, next_state, done):
@@ -108,10 +106,11 @@ class DQLAgent(SchopenhauerAgent):
         st = st.reshape((4, 4, 16))
         inds = np.argwhere(st == 1)
         st = np.exp2(inds).astype(np.int32)
-
+        print(f'episode {episode}')
         print(f'Total steps {len(self.trajectory.steps)}')
         print(f'Highest tile {np.max(st)}')
         print('total reward:', sum([ts.reward for ts in self.trajectory.steps]))
+        print(64*'-')
 
     def learn(self):
         for n in range(self.params.n_episodes):
