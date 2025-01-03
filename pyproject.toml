@@ -23,3 +23,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 train = "rla2048.play:train"
+play = "rla2048.play:play"

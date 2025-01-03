@@ -87,10 +87,13 @@ class DQLAgent(SchopenhauerAgent):
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
-    def process_step(self, record=False):
+    def process_step(self, record=False, human=False):
         if record:
             img = self.env.render()
             self.images.append(img)
+        if human:
+            input('next step')
+
         self.replay()
         if len(self.trajectory.steps) % self.update_target_steps == 0:
             self.update_target_model()
@@ -99,10 +102,11 @@ class DQLAgent(SchopenhauerAgent):
         self.decay_epsilon()
         st = self.trajectory.steps[-1].next_state
         st = st.reshape((4, 4, 16))
-        st = np.exp2(st[:, :]).reshape((4, 4))
+        inds = np.argwhere(st == 1)
+        st = np.exp2(inds).astype(np.int32)
 
         print(f'Total steps {len(self.trajectory.steps)}')
-        print(f'Highest tile {max(st)}')
+        print(f'Highest tile {np.max(st)}')
         print('total reward:', sum([ts.reward for ts in self.trajectory.steps]))
 
     def learn(self):
@@ -115,3 +119,5 @@ class DQLAgent(SchopenhauerAgent):
         self.images = []
         self.generate_trajectory(policy='behave', record=True)
 
+    def human_play(self):
+        self.generate_trajectory(human=True)
