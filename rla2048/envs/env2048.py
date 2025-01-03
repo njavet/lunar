@@ -26,7 +26,7 @@ class Env2048(gym.Env):
     def __init__(self, render_mode=None):
         self.action_space = spaces.Discrete(4)
         # 4x4 grid with 16bit onehot encoding
-        self.board = np.zeros((4, 4), dtype=np.uint16)
+        self.board = np.zeros((4, 4), dtype=np.int64)
         self.score = 0
         self.observation_space = spaces.MultiBinary(256)
         self.window_size = 512
@@ -50,7 +50,7 @@ class Env2048(gym.Env):
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self.board = np.zeros((4, 4), dtype=np.uint16)
+        self.board = np.zeros((4, 4), dtype=np.int64)
         self.score = 0
         self.add_random_tile()
         self.add_random_tile()

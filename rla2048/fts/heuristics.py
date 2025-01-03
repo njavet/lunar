@@ -19,7 +19,10 @@ def smoothness_heuristic(board: np.array) -> float:
         for i in range(3):
             if col[i] > 0 and col[i + 1] > 0:
                 distances += abs(col[i] - col[i + 1])
-    return 1 / distances
+    if distances > 0:
+        return 1 / distances
+    else:
+        return 1
 
 
 def monotonicity_heuristic(board: np.ndarray) -> float:
@@ -30,6 +33,7 @@ def monotonicity_heuristic(board: np.ndarray) -> float:
             return 1
         else:
             return 0
+
     def calculate_dec(array):
         if np.all([array[i] >= array[i + 1] for i in range(len(array) - 1)]):
             return 1
@@ -42,12 +46,10 @@ def monotonicity_heuristic(board: np.ndarray) -> float:
     for col in board.transpose():
         monotonicity += calculate_inc(col)
         monotonicity += calculate_dec(col)
-    try:
-        mon_norm = -1 / monotonicity
-    except ZeroDivisionError:
-        mon_norm = -1
-
-    return mon_norm
+    if monotonicity > 0:
+        return -1 / monotonicity
+    else:
+        return -1
 
 
 def corner_heuristic(board: np.array) -> float:
@@ -55,11 +57,11 @@ def corner_heuristic(board: np.array) -> float:
                         [0, 0, 0, 0],
                         [0, 0, 0, 0],
                         [1, 0, 0, 1]])
-    try:
-        corn = -1 / np.sum(board * weights)
-    except ZeroDivisionError:
-        corn = -1
-    return corn
+    cs = np.sum(board * weights)
+    if cs > 0:
+        return -1 / cs
+    else:
+        return -1
 
 
 def utility(grid: np.ndarray, weights: np.ndarray = None) -> float:

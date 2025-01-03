@@ -27,7 +27,7 @@ def merge_left(board: np.ndarray) -> tuple[np.ndarray, float]:
         padded_row = np.pad(merged_row, (0, 4 - len(merged_row)))
         new_board.append(padded_row)
         score += s_
-    return np.array(new_board, dtype=np.uint16), score
+    return np.array(new_board, dtype=np.int64), score
 
 
 def merge_right(board: np.ndarray) -> tuple[np.ndarray, float]:

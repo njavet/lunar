@@ -40,10 +40,9 @@ def train():
     start = datetime.datetime.now()
     agent.learn()
     end = datetime.datetime.now()
-
+    print(f'highest tile: {max(agent.max_tiles)}')
     print('training time: ', (end - start))
     torch.save(agent.model.state_dict(), 'dql_2048.pth')
-    print(f'highest tile: {max(agent.max_tiles)}')
 
     agent.record_video()
     height, width = agent.images[0].shape[0], agent.images[0].shape[1]
