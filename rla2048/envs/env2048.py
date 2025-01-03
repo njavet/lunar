@@ -117,6 +117,7 @@ class Env2048(gym.Env):
         if self.window is None and self.render_mode == 'human':
             pygame.init()
             pygame.display.init()
+            pygame.display.set_caption('risktec 2048 rl agent')
             self.window = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
         if self.clock is None and self.render_mode == 'human':
             self.clock = pygame.time.Clock()
@@ -125,6 +126,11 @@ class Env2048(gym.Env):
         canvas.fill((255, 255, 255))
         pygame.font.init()
         font = pygame.font.Font(None, 55)
+        text_surface = font.render('Score: ' + str(self.score),
+                                   True,
+                                   config.FONT_COLOR)
+        text_rect = text_surface.get_rect(center=(100, 50))
+        canvas.blit(text_surface, text_rect)
 
         cell_size = config.TILE_SIZE + config.GAP_SIZE
         for i, row in enumerate(self.board):
@@ -132,8 +138,8 @@ class Env2048(gym.Env):
                 cell = int(cell)
                 color = config.TILE_COLORS.get(cell, config.TILE_COLORS[4096])
                 # different coordinate system
-                x = config.GAP_SIZE + j * cell_size
-                y = config.GAP_SIZE + i * cell_size
+                x = config.GAP_SIZE + j * cell_size + 2
+                y = config.GAP_SIZE + i * cell_size + 200
                 rect = pygame.Rect(x, y, config.TILE_SIZE, config.TILE_SIZE)
                 pygame.draw.rect(canvas,
                                  color=color,
@@ -152,15 +158,15 @@ class Env2048(gym.Env):
             pygame.draw.line(
                 canvas,
                 0,
-                (4, cell_size * x),
-                (self.window_size, cell_size * x),
+                (4, cell_size * x + 204),
+                (config.WIDTH - 24, cell_size * x + 204),
                 width=3,
             )
             pygame.draw.line(
                 canvas,
                 0,
-                (cell_size * x, 4),
-                (cell_size * x, self.window_size),
+                (cell_size * x + 4, 204),
+                (cell_size * x + 4, config.WIDTH + 180),
                 width=3,
             )
 

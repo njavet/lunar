@@ -10,7 +10,7 @@ from rla2048.schemas import Params
 
 def get_default_params():
     params = Params(n_runs=32,
-                    n_episodes=1,
+                    n_episodes=1024,
                     alpha=0.1,
                     gamma=0.99,
                     epsilon=0.8,
