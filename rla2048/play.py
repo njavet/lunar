@@ -10,7 +10,7 @@ from rla2048.schemas import Params
 
 def get_default_params():
     params = Params(n_runs=32,
-                    n_episodes=1024,
+                    n_episodes=4096,
                     alpha=0.1,
                     gamma=0.99,
                     epsilon=0.8,
@@ -27,7 +27,7 @@ def play():
     env = gym.make('rla2048/Game2048-v0', render_mode='human')
     params = get_default_params()
     agent = DQLAgent(env, params)
-    agent.model.load_state_dict(torch.load('dql_2048.pth'), weights_only=False)
+    agent.model.load_state_dict(torch.load('dql_2048.pth', weights_only=False))
     agent.human_play()
 
 

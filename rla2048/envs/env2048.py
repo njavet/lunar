@@ -176,6 +176,13 @@ class Env2048(gym.Env):
             self.window.blit(canvas, canvas.get_rect())
             pygame.event.pump()
             pygame.display.update()
+            button_color = (0, 200, 0)
+            button_rect = pygame.Rect(200, 10, 10, 250)
+            paused = True
+            while paused:
+                for event in pygame.event.get():
+                    if event.type == pygame.K_KP_ENTER:
+                        paused = False
 
             # We need to ensure that human-rendering occurs at the
             # predefined framerate.
