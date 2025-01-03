@@ -38,14 +38,14 @@ def merge_right(board):
 
 
 def merge_down(board):
-    new_board = np.rot90(board)
+    new_board = np.rot90(board, -1)
     new_board, reward = merge_left(new_board)
-    new_board = np.rot90(new_board, -1)
+    new_board = np.rot90(new_board)
     return new_board, reward
 
 
 def merge_up(board):
-    new_board = np.rot90(board, -1)
+    new_board = np.rot90(board)
     new_board, reward = merge_left(new_board)
-    new_board = np.rot90(new_board)
+    new_board = np.rot90(new_board, -1)
     return new_board, reward
