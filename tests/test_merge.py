@@ -26,9 +26,9 @@ class TestMerge(unittest.TestCase):
                              [4, 4, 0, 0]])
         self.assertTrue(np.array_equal(grid, grid_res))
 
-    def test_merge_left_reward_grid0(self):
-        _, reward = merge_left(self.grid0)
-        self.assertEqual(reward, 20)
+    def test_merge_left_score_grid0(self):
+        _, score = merge_left(self.grid0)
+        self.assertEqual(score, 20)
 
     def test_merge_left_grid1(self):
         grid, _ = merge_left(self.grid1)
@@ -38,9 +38,9 @@ class TestMerge(unittest.TestCase):
                              [32, 0, 0, 0]])
         self.assertTrue(np.array_equal(grid, grid_res))
 
-    def test_merge_left_reward_grid1(self):
-        _, reward = merge_left(self.grid1)
-        self.assertEqual(reward, 12)
+    def test_merge_left_score_grid1(self):
+        _, score = merge_left(self.grid1)
+        self.assertEqual(score, 12)
 
     def test_merge_right_grid0(self):
         grid, _ = merge_right(self.grid0)
@@ -66,9 +66,9 @@ class TestMerge(unittest.TestCase):
                              [0, 0, 0, 0]])
         self.assertTrue(np.array_equal(grid, grid_res))
 
-    def test_merge_up_reward_grid0(self):
-        _, reward = merge_up(self.grid0)
-        self.assertEqual(reward, 12)
+    def test_merge_up_score_grid0(self):
+        _, score = merge_up(self.grid0)
+        self.assertEqual(score, 12)
 
     def test_merge_up_grid1(self): 
         grid, _ = merge_up(self.grid1)
@@ -78,9 +78,9 @@ class TestMerge(unittest.TestCase):
                              [0, 0, 0, 0]])
         self.assertTrue(np.array_equal(grid, grid_res))
 
-    def test_merge_up_reward_grid1(self):
-        _, reward = merge_up(self.grid1)
-        self.assertEqual(reward, 56)
+    def test_merge_up_score_grid1(self):
+        _, score = merge_up(self.grid1)
+        self.assertEqual(score, 56)
 
     def test_merge_down_grid0(self):
         grid, _ = merge_down(self.grid0)
