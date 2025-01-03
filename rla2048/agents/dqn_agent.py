@@ -39,7 +39,7 @@ class DQLAgent(SchopenhauerAgent):
         print('Q values', q_values)
         return torch.argmax(q_values).item()
 
-    def behave_policy(self, state: np.ndarray) -> int:
+    def behave_policy(self, state: torch.Tensor) -> int:
         if np.random.rand() <= self.epsilon:
             return self.env.action_space.sample()
         state = torch.FloatTensor(state).unsqueeze(0)

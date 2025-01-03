@@ -22,16 +22,16 @@ class SchopenhauerAgent(ABC):
         self.policies = {'optimal': self.optimal_policy,
                          'behave': self.behave_policy}
 
-    def optimal_policy(self, state: np.ndarray) -> int:
+    def optimal_policy(self, state: torch.Tensor) -> int:
         raise NotImplementedError
 
-    def behave_policy(self, state: np.ndarray) -> int:
+    def behave_policy(self, state: torch.Tensor) -> int:
         raise NotImplementedError
 
     def reset_trajectory(self):
         self.trajectory = Trajectory()
 
-    def exec_step(self, state: np.ndarray, action: int) -> tuple[TrajectoryStep, bool]:
+    def exec_step(self, state: torch.Tensor, action: int) -> tuple[TrajectoryStep, bool]:
         next_state, reward, term, trunc, info = self.env.step(action)
         next_state = torch.tensor(next_state, dtype=torch.float32).to('cuda')
         reward = torch.tensor(reward, dtype=torch.float32).to('cuda')
