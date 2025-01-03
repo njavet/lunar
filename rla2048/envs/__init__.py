@@ -1,1 +1,1 @@
-from rla2048.envs.grid_world import GridWorldEnv
+from .envs.env2048 import Env2048
