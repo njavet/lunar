@@ -11,12 +11,12 @@ class TestMerge(unittest.TestCase):
         cls.grid0 = np.array([[2, 2, 2, 2],
                               [4, 4, 0, 0],
                               [2, 4, 8, 16],
-                              [2, 0, 2, 4]], dtype=np.uint16)
+                              [2, 0, 2, 4]])
 
         cls.grid1 = np.array([[2, 2, 4, 2],
                               [8, 4, 4, 16],
                               [8, 0, 0, 16],
-                              [0, 0, 0, 32]], dtype=np.uint16)
+                              [0, 0, 0, 32]])
 
     def test_merge_left_grid0(self):
         grid, _ = merge_left(self.grid0)
