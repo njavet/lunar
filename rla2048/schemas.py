@@ -29,5 +29,3 @@ class TrajectoryStep(BaseModel):
 
 class Trajectory(BaseModel):
     steps: list[TrajectoryStep] = Field(default_factory=list)
-
-

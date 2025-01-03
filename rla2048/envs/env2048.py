@@ -67,6 +67,9 @@ class Env2048(gym.Env):
         if not np.array_equal(self.board, new_board):
             self.board = new_board
             self.add_random_tile()
+        else:
+            # punish non actions
+            reward = -10
 
         observation = self.get_obs()
         info = self.get_info()
