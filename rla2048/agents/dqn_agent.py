@@ -1,4 +1,5 @@
 import numpy as np
+import time
 import random
 import torch
 import torch.nn as nn
@@ -83,6 +84,7 @@ class DQLAgent(SchopenhauerAgent):
         self.replay()
         if len(self.trajectory.steps) % self.update_target_steps == 0:
             self.update_target_model()
+        time.sleep(1)
 
     def process_trajectory(self, episode):
         self.decay_epsilon()

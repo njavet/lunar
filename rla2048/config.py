@@ -1,5 +1,5 @@
 TILE_COLORS = {
-    0: "#2D033B",     # Empty tile
+    0: "#ffffff",     # Empty tile
     2: "#6D28F0",     # Light purple
     4: "#570A57",     # Darker purple
     8: "#A259FF",     # Bright purple
@@ -12,3 +12,9 @@ TILE_COLORS = {
     1024: "#D68FD6",  # Light lavender
     2048: "#E0BBE4",  # Pale purple
 }
+
+TILE_SIZE = 101
+GAP_SIZE = 8
+WIDTH = 4 * TILE_SIZE + 5 * GAP_SIZE
+HEIGHT = WIDTH
+FONT_COLOR = 'black'

@@ -7,6 +7,7 @@ import pygame
 
 # project imports
 from rla2048.fts import merge_left, merge_down, merge_right, merge_up
+from rla2048 import config
 
 
 class Actions(Enum):
@@ -105,46 +106,45 @@ class Env2048(gym.Env):
         if self.window is None and self.render_mode == 'human':
             pygame.init()
             pygame.display.init()
-            self.window = pygame.display.set_mode((self.window_size, self.window_size))
+            self.window = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
         if self.clock is None and self.render_mode == 'human':
             self.clock = pygame.time.Clock()
 
-        canvas = pygame.Surface((self.window_size, self.window_size))
+        canvas = pygame.Surface((config.WIDTH, config.HEIGHT))
         canvas.fill((255, 255, 255))
-        # The size of a single grid square in pixels
-        pix_square_size = (
-            self.window_size / 4
-        )
         font = pygame.font.Font(None, 55)
+
+        cell_size = config.TILE_SIZE + config.GAP_SIZE
         for i, row in enumerate(self.board):
             for j, cell in enumerate(row):
-                rect = pygame.Rect(pix_square_size * i,
-                                   pix_square_size * j,
-                                   pix_square_size,
-                                   pix_square_size)
-                color = self.tile_colors.get(value, )
-                if cell != 0:
-                    text_surface = font.render(str(value), True, FONT_COLOR)
-                text_rect = text_surface.get_rect(center=(x + TILE_SIZE // 2, y + TILE_SIZE // 2))
-                screen.blit(text_surface, text_rect)
+                cell = int(cell)
+                color = config.TILE_COLORS.get(cell, config.TILE_COLORS[2048])
+                x = config.GAP_SIZE + i * cell_size
+                y = config.GAP_SIZE + j * cell_size
+                rect = pygame.Rect(x, y, config.TILE_SIZE, config.TILE_SIZE)
                 pygame.draw.rect(canvas,
-                                 color=(255, 0, 0),
+                                 color=color,
                                  rect=rect,
                                  border_radius=10)
+                if cell != 0:
+                    text_surface = font.render(str(cell), True, config.FONT_COLOR)
+                    text_rect = text_surface.get_rect(center=(x + config.TILE_SIZE // 2,
+                                                              y + config.TILE_SIZE // 2))
+                    canvas.blit(text_surface, text_rect)
 
         for x in range(5):
             pygame.draw.line(
                 canvas,
                 0,
-                (0, pix_square_size * x),
-                (self.window_size, pix_square_size * x),
+                (4, cell_size * x),
+                (self.window_size, cell_size * x),
                 width=3,
             )
             pygame.draw.line(
                 canvas,
                 0,
-                (pix_square_size * x, 0),
-                (pix_square_size * x, self.window_size),
+                (cell_size * x, 4),
+                (cell_size * x, self.window_size),
                 width=3,
             )
 
