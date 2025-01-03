@@ -1,4 +1,5 @@
 import numpy as np
+import time
 import random
 import torch
 import torch.nn as nn
@@ -23,7 +24,7 @@ class DQLAgent(SchopenhauerAgent):
         self.batch_size = params.batch_size
         self.update_target_steps = 16
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
-        self.criterion = nn.CrossEntropyLoss()
+        self.criterion = nn.MSELoss()
         self.trajectories = defaultdict(list)
         self.images = None
 

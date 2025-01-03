@@ -8,6 +8,7 @@ from gymnasium.core import RenderFrame
 
 # project imports
 from rla2048.fts import merge_left, merge_down, merge_right, merge_up
+from rla2048.fts.heuristics import old_utility
 from rla2048 import config
 
 
@@ -65,11 +66,15 @@ class Env2048(gym.Env):
         new_board, reward = self.action_to_merge(action)
         self.score += reward
         if not np.array_equal(self.board, new_board):
+            ut = old_utility(self.board)
+            ut_new = old_utility(new_board)
             self.board = new_board
             self.add_random_tile()
+            delta = ut_new - ut
             reward += 0.1
+            reward += delta
         else:
-            # punish non actions
+            # punish nop actions
             reward = -0.1
 
         observation = self.get_obs()
