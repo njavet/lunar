@@ -1,9 +1,9 @@
 from enum import Enum
+import random
+import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 import pygame
-import random
-import numpy as np
 
 
 class Actions(Enum):
@@ -21,14 +21,8 @@ class Env2048(gym.Env):
         self.action_space = spaces.Discrete(4)
         # 4x4 grid with 16bit onehot encoding
         self.board = np.zeros((4, 4), dtype=np.uint16)
-        self.score = 0
+        self.reward = 0
         self.observation_space = spaces.MultiBinary(256)
-        self._action_to_merge = {
-            Actions.left.value: np.array([-1, 0]),
-            Actions.down.value: np.array([0, -1]),
-            Actions.right.value: np.array([1, 0]),
-            Actions.up.value: np.array([0, 1]),
-        }
         self.window_size = 512
         self.render_mode = render_mode
         self.window = None
@@ -45,36 +39,25 @@ class Env2048(gym.Env):
         obs[rs, cs, one_hot] = 1
         return obs.flatten()
 
-
     def get_info(self):
         return {'score': self.score}
 
     def reset(self, seed=None, options=None):
-        # We need the following line to seed self.np_random
         super().reset(seed=seed)
+        self.board = np.zeros((4, 4), dtype=np.uint16)
+        self.score = 0
+        self.add_random_tile()
+        self.add_random_tile()
+        observation = self.get_obs()
+        info = self.get_info()
 
-        # Choose the agent's location uniformly at random
-        self._agent_location = self.np_random.integers(0, self.size, size=2, dtype=int)
-
-        # We will sample the target's location randomly until it does not
-        # coincide with the agent's location
-        self._target_location = self._agent_location
-        while np.array_equal(self._target_location, self._agent_location):
-            self._target_location = self.np_random.integers(
-                0, self.size, size=2, dtype=int
-            )
-
-        observation = self._get_obs()
-        info = self._get_info()
-
-        if self.render_mode == "human":
+        if self.render_mode == 'human':
             self._render_frame()
 
         return observation, info
 
     def step(self, action):
-        # Map the action (element of {0,1,2,3}) to the direction we walk in
-        direction = self._action_to_direction[action]
+        self.action_to_merge(action)
         # We use `np.clip` to make sure we don't leave the grid
         self._agent_location = np.clip(
             self._agent_location + direction, 0, self.size - 1
@@ -90,16 +73,77 @@ class Env2048(gym.Env):
 
         return observation, reward, terminated, False, info
 
+    def action_to_merge(self, action):
+        if action == 0:
+            new_board = self.merge_left()
+        elif action == 1:
+            new_board = self.merge_down()
+        elif action == 2:
+            new_board = self.merge_right()
+            self.board = np.fliplr(self.board)
+            score = self.merge_to_left()
+            self.board = np.fliplr(self.board)
+        elif action == 3:
+            new_board = self.merge_up()
+            self.board = np.rot90(self.board, -1)
+            score = self.merge_to_left()
+            self.board = np.rot90(self.board)
+        if not np.array_equal(self.board, old_board):
+            self.add_random_tile()
+        return score
+
+    def merge_row_left(self, row, acc, score: float = 0):
+        if not row:
+            return acc, score
+        x = row[0]
+        if len(row) == 1:
+            return acc + [x], score
+
+        if x == row[1]:
+            new_row = row[2:]
+            new_acc = acc + [2 * x]
+            new_score = score + 2 * x
+            return self.merge_row_left(new_row, new_acc, new_score)
+        else:
+            new_row = row[1:]
+            new_acc = acc + [x]
+            new_score = score
+            return self.merge_row_left(new_row, new_acc, new_score)
+
+    def merge_left(self):
+        new_board = []
+        self.reward = 0
+        for i, row in enumerate(self.board):
+            merged, r = self.merge_row_left([x for x in row if x != 0], [])
+            zeros = len(row) - len(merged)
+            merged_zeros = merged + zeros * [0]
+            new_board.append(merged_zeros)
+            self.reward += r
+        return np.array(new_board, dtype=np.uint16)
+
+    def merge_right(self):
+        pass
+
+    def merge_down(self):
+        self.board = np.rot90(self.board)
+        score = self.merge_to_left()
+        self.board = np.rot90(self.board, -1)
+        pass
+
+    def merge_up(self):
+        pass
+
+
     def render(self):
-        if self.render_mode == "rgb_array":
+        if self.render_mode == 'rgb_array':
             return self._render_frame()
 
     def _render_frame(self):
-        if self.window is None and self.render_mode == "human":
+        if self.window is None and self.render_mode == 'human':
             pygame.init()
             pygame.display.init()
             self.window = pygame.display.set_mode((self.window_size, self.window_size))
-        if self.clock is None and self.render_mode == "human":
+        if self.clock is None and self.render_mode == 'human':
             self.clock = pygame.time.Clock()
 
         canvas = pygame.Surface((self.window_size, self.window_size))
@@ -142,7 +186,7 @@ class Env2048(gym.Env):
                 width=3,
             )
 
-        if self.render_mode == "human":
+        if self.render_mode == 'human':
             # The following line copies our drawings from `canvas` to the visible window
             self.window.blit(canvas, canvas.get_rect())
             pygame.event.pump()
@@ -151,7 +195,7 @@ class Env2048(gym.Env):
             # We need to ensure that human-rendering occurs at the predefined framerate.
             # The following line will automatically add a delay to
             # keep the framerate stable.
-            self.clock.tick(self.metadata["render_fps"])
+            self.clock.tick(self.metadata['render_fps'])
         else:  # rgb_array
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
