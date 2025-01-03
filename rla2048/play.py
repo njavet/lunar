@@ -27,7 +27,7 @@ def play():
     env = gym.make('rla2048/Game2048-v0', render_mode='human')
     params = get_default_params()
     agent = DQLAgent(env, params)
-    agent.model.load_state_dict(torch.load('dqn2048.mp4'))
+    agent.model.load_state_dict(torch.load('dql_2048.pth'), weights_only=False)
     agent.human_play()
 
 

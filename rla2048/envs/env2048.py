@@ -69,7 +69,7 @@ class Env2048(gym.Env):
             self.add_random_tile()
         else:
             # punish non actions
-            reward = -10
+            reward = -2
 
         observation = self.get_obs()
         info = self.get_info()

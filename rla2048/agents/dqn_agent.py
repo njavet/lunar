@@ -1,5 +1,4 @@
 import numpy as np
-import time
 import random
 import torch
 import torch.nn as nn
@@ -32,6 +31,7 @@ class DQLAgent(SchopenhauerAgent):
         state = torch.FloatTensor(state).unsqueeze(0)
         with torch.no_grad():
             q_values = self.model(state)
+        print('Q values', q_values)
         return torch.argmax(q_values).item()
 
     def behave_policy(self, state: np.ndarray) -> int:
@@ -48,7 +48,11 @@ class DQLAgent(SchopenhauerAgent):
                               nn.ReLU(),
                               nn.Linear(128, 128),
                               nn.ReLU(),
-                              nn.Linear(128, 4))
+                              nn.Linear(128, 64),
+                              nn.ReLU(),
+                              nn.Linear(64, 32),
+                              nn.ReLU(),
+                              nn.Linear(32, 4))
         return model
 
     def remember(self, state, action, reward, next_state, done):
@@ -92,7 +96,7 @@ class DQLAgent(SchopenhauerAgent):
             img = self.env.render()
             self.images.append(img)
         if human:
-            input('next step')
+            go = input('next step')
 
         self.replay()
         if len(self.trajectory.steps) % self.update_target_steps == 0:
