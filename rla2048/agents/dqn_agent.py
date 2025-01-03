@@ -89,12 +89,10 @@ class DQLAgent(SchopenhauerAgent):
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
-    def process_step(self, record=False, human=False):
+    def process_step(self, record=False):
         if record:
             img = self.env.render()
             self.images.append(img)
-        if human:
-            go = input('next step')
 
         self.replay()
         if len(self.trajectory.steps) % self.update_target_steps == 0:
@@ -121,6 +119,3 @@ class DQLAgent(SchopenhauerAgent):
     def record_video(self):
         self.images = []
         self.generate_trajectory(policy='behave', record=True)
-
-    def human_play(self):
-        self.generate_trajectory(human=True)

@@ -28,7 +28,7 @@ def play():
     params = get_default_params()
     agent = DQLAgent(env, params)
     agent.model.load_state_dict(torch.load('dql_2048.pth', weights_only=False))
-    agent.human_play()
+    agent.generate_trajectory()
 
 
 def train():
