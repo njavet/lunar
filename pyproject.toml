@@ -1,15 +1,17 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["rla2048"]
-
-[project]
+[tool.poetry]
 name = "rla2048"
-version = "0.0.1"
-dependencies = [
-  "gymnasium",
-  "pygame>=2.1.3",
-  "pre-commit",
-]
+version = "0.1.0"
+description = ""
+authors = ["Noe Javet <np.javet@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+gymnasium = "^1.0.0"
+pre-commit = "^4.0.1"
+pygame = "^2.6.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
