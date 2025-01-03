@@ -82,9 +82,9 @@ class DQLAgent(SchopenhauerAgent):
 
     def process_step(self):
         self.replay()
+        ts = self.trajectory.steps[-1]
         if len(self.trajectory.steps) % self.update_target_steps == 0:
             self.update_target_model()
-        time.sleep(1)
 
     def process_trajectory(self, episode):
         self.decay_epsilon()

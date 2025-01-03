@@ -23,7 +23,7 @@ def get_default_params():
 
 
 def train():
-    env = gym.make('rla2048/Game2048-v0', render_mode='ansi')
+    env = gym.make('rla2048/Game2048-v0', render_mode='human')
     params = get_default_params()
     agent = DQLAgent(env, params)
     agent.learn()

@@ -1,4 +1,5 @@
 from enum import Enum
+import time
 import random
 import numpy as np
 import gymnasium as gym
@@ -61,19 +62,28 @@ class Env2048(gym.Env):
         return observation, info
 
     def step(self, action):
-        new_board, reward = self.action_to_merge(action)
-        if not np.array_equal(self.board, new_board):
-            self.add_random_tile()
-            self.board = new_board
 
+        print('received action:', action)
+        print('before move:')
+        self.render_ansi()
+        time.sleep(10)
+        new_board, reward = self.action_to_merge(action)
         self.score += reward
+        if not np.array_equal(self.board, new_board):
+            self.board = new_board
+            print('after move:')
+            self.render_ansi()
+            self.add_random_tile()
+            print('after tile add')
+            self.render_ansi()
+
+        time.sleep(10)
         observation = self.get_obs()
         info = self.get_info()
 
         if self.render_mode == 'human':
             self._render_frame()
         if self.render_mode == 'ansi':
-            print('step', 5)
             self.render_ansi()
 
         return observation, reward, self.game_over, False, info
@@ -94,7 +104,7 @@ class Env2048(gym.Env):
     @property
     def game_over(self) -> bool:
         if np.any(self.board == 0):
-            return True
+            return False
         for action in Actions:
             new_board, _ = self.action_to_merge(action.value)
             if not np.array_equal(self.board, new_board):
@@ -127,8 +137,8 @@ class Env2048(gym.Env):
             for j, cell in enumerate(row):
                 cell = int(cell)
                 color = config.TILE_COLORS.get(cell, config.TILE_COLORS[2048])
-                x = config.GAP_SIZE + i * cell_size
-                y = config.GAP_SIZE + j * cell_size
+                x = config.GAP_SIZE + j * cell_size
+                y = config.GAP_SIZE + i * cell_size
                 rect = pygame.Rect(x, y, config.TILE_SIZE, config.TILE_SIZE)
                 pygame.draw.rect(canvas,
                                  color=color,
