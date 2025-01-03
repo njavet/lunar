@@ -5,6 +5,9 @@ import gymnasium as gym
 from gymnasium import spaces
 import pygame
 
+# project imports
+from rla2048.fts.merge import merge_left, merge_down, merge_right, merge_up
+
 
 class Actions(Enum):
     left = 0
@@ -75,64 +78,18 @@ class Env2048(gym.Env):
 
     def action_to_merge(self, action):
         if action == 0:
-            new_board = self.merge_left()
+            new_board, reward = merge_left(self.board)
         elif action == 1:
-            new_board = self.merge_down()
+            new_board, reward = merge_down(self.board)
         elif action == 2:
-            new_board = self.merge_right()
-            self.board = np.fliplr(self.board)
-            score = self.merge_to_left()
-            self.board = np.fliplr(self.board)
+            new_board, reward = merge_right(self.board)
         elif action == 3:
-            new_board = self.merge_up()
-            self.board = np.rot90(self.board, -1)
-            score = self.merge_to_left()
-            self.board = np.rot90(self.board)
-        if not np.array_equal(self.board, old_board):
-            self.add_random_tile()
-        return score
-
-    def merge_row_left(self, row, acc, score: float = 0):
-        if not row:
-            return acc, score
-        x = row[0]
-        if len(row) == 1:
-            return acc + [x], score
-
-        if x == row[1]:
-            new_row = row[2:]
-            new_acc = acc + [2 * x]
-            new_score = score + 2 * x
-            return self.merge_row_left(new_row, new_acc, new_score)
+            new_board, reward = merge_up(self.board)
         else:
-            new_row = row[1:]
-            new_acc = acc + [x]
-            new_score = score
-            return self.merge_row_left(new_row, new_acc, new_score)
-
-    def merge_left(self):
-        new_board = []
-        self.reward = 0
-        for i, row in enumerate(self.board):
-            merged, r = self.merge_row_left([x for x in row if x != 0], [])
-            zeros = len(row) - len(merged)
-            merged_zeros = merged + zeros * [0]
-            new_board.append(merged_zeros)
-            self.reward += r
-        return np.array(new_board, dtype=np.uint16)
-
-    def merge_right(self):
-        pass
-
-    def merge_down(self):
-        self.board = np.rot90(self.board)
-        score = self.merge_to_left()
-        self.board = np.rot90(self.board, -1)
-        pass
-
-    def merge_up(self):
-        pass
-
+            raise ValueError('invalid action')
+        if not np.array_equal(self.board, new_board):
+            self.add_random_tile()
+        return reward
 
     def render(self):
         if self.render_mode == 'rgb_array':
