@@ -5,6 +5,9 @@ import torch.nn as nn
 import torch.optim as optim
 from collections import deque
 
+# project imports
+from rla2048.schemas import Trajectory, TrajectoryStep
+
 
 class DQLAgent:
     def __init__(self):

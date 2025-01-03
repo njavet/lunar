@@ -57,7 +57,7 @@ class Env2048(gym.Env):
         if self.render_mode == 'human':
             self._render_frame()
 
-        return observation, info
+        return observation, False, info
 
     def step(self, action):
         new_board, reward = self.action_to_merge(action)
