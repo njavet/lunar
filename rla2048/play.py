@@ -10,12 +10,12 @@ from rla2048.schemas import Params
 
 def get_default_params():
     params = Params(n_runs=32,
-                    n_episodes=1024,
+                    n_episodes=4024,
                     alpha=0.1,
                     gamma=0.99,
-                    epsilon=0.8,
+                    epsilon=1,
                     epsilon_min=0.05,
-                    decay=0.99,
+                    decay=0.99999999,
                     seed=0x101,
                     batch_size=64,
                     update_target_steps=10,
@@ -37,6 +37,7 @@ def train():
     agent = DQLAgent(env, params)
     agent.learn()
     torch.save(agent.model.state_dict(), 'dql_2048.pth')
+    print(f'highest tile: {max(agent.max_tiles)}')
 
     agent.record_video()
     height, width = agent.images[0].shape[0], agent.images[0].shape[1]

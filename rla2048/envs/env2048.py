@@ -71,11 +71,11 @@ class Env2048(gym.Env):
             self.board = new_board
             self.add_random_tile()
             delta = ut_new - ut
-            reward += 0.1
-            reward += delta
+            reward += 0.5
+            reward += 18*delta
         else:
             # punish nop actions
-            reward = -0.1
+            reward = -2
 
         observation = self.get_obs()
         info = self.get_info()
@@ -184,17 +184,18 @@ class Env2048(gym.Env):
             pygame.display.update()
             button_color = (0, 200, 0)
             button_rect = pygame.Rect(200, 10, 10, 250)
+            pygame.draw.rect(canvas, color=button_color, rect=button_rect)
             paused = True
+            self.clock.tick(self.metadata['render_fps'])
             while paused:
                 for event in pygame.event.get():
-                    if event.type == pygame.K_KP_ENTER:
+                    if event.type == pygame.KEYUP:
                         paused = False
 
             # We need to ensure that human-rendering occurs at the
             # predefined framerate.
             # The following line will automatically add a delay to
             # keep the framerate stable.
-            self.clock.tick(self.metadata['render_fps'])
         else:  # rgb_array
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)

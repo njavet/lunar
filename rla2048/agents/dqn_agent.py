@@ -27,8 +27,12 @@ class DQLAgent(SchopenhauerAgent):
         self.criterion = nn.MSELoss()
         self.trajectories = defaultdict(list)
         self.images = None
+        self.max_tiles = None
+        self.total_rewards = None
 
     def optimal_policy(self, state: np.ndarray) -> int:
+        if np.random.rand() <= 0.1:
+            return self.env.action_space.sample()
         state = torch.FloatTensor(state).unsqueeze(0)
         with torch.no_grad():
             q_values = self.model(state)
@@ -105,13 +109,18 @@ class DQLAgent(SchopenhauerAgent):
         st = st.reshape((4, 4, 16))
         inds = np.argwhere(st == 1)
         st = np.exp2(inds).astype(np.int32)
-        print(f'episode {episode}')
+        self.max_tiles.append(np.max(st))
+        tr = sum([ts.reward for ts in self.trajectory.steps])
+        self.total_rewards.append(tr)
+        print(f'episode {episode} with epsilon: {self.epsilon}')
         print(f'Total steps {len(self.trajectory.steps)}')
         print(f'Highest tile {np.max(st)}')
-        print('total reward:', sum([ts.reward for ts in self.trajectory.steps]))
+        print(f'total reward: {tr}')
         print(64*'-')
 
     def learn(self):
+        self.max_tiles = []
+        self.total_rewards = []
         for n in range(self.params.n_episodes):
             self.generate_trajectory(policy='behave')
             self.trajectories[n] = self.trajectory
