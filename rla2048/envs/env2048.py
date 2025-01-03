@@ -1,10 +1,10 @@
 from enum import Enum
-import time
 import random
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 import pygame
+from gymnasium.core import RenderFrame
 
 # project imports
 from rla2048.fts import merge_left, merge_down, merge_right, merge_up
@@ -62,7 +62,6 @@ class Env2048(gym.Env):
         return observation, info
 
     def step(self, action):
-        time.sleep(4)
         new_board, reward = self.action_to_merge(action)
         self.score += reward
         if not np.array_equal(self.board, new_board):
@@ -102,7 +101,7 @@ class Env2048(gym.Env):
                 return False
         return True
 
-    def render(self):
+    def render(self) -> RenderFrame | list[RenderFrame] | None:
         if self.render_mode == 'rgb_array':
             return self._render_frame()
 
@@ -121,6 +120,7 @@ class Env2048(gym.Env):
 
         canvas = pygame.Surface((config.WIDTH, config.HEIGHT))
         canvas.fill((255, 255, 255))
+        pygame.font.init()
         font = pygame.font.Font(None, 55)
 
         cell_size = config.TILE_SIZE + config.GAP_SIZE

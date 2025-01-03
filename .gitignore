@@ -163,3 +163,5 @@ cython_debug/
 # TODO less nuclear options
 .idea/
 
+*.mp4
+

@@ -109,5 +109,5 @@ class DQLAgent(SchopenhauerAgent):
 
     def record_video(self):
         self.images = []
-        self.generate_trajectory(record=True)
+        self.generate_trajectory(policy='behave', record=True)
 
