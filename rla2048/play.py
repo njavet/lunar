@@ -1,5 +1,7 @@
 import gymnasium as gym
+import datetime
 import torch
+import time
 from pathlib import Path
 import cv2
 
@@ -10,12 +12,12 @@ from rla2048.schemas import Params
 
 def get_default_params():
     params = Params(n_runs=32,
-                    n_episodes=16192,
+                    n_episodes=2**25,
                     alpha=0.1,
                     gamma=0.99,
                     epsilon=1,
                     epsilon_min=0.05,
-                    decay=0.9998,
+                    decay=0.999999,
                     seed=0x101,
                     batch_size=64,
                     update_target_steps=10,
@@ -35,7 +37,11 @@ def train():
     env = gym.make('rla2048/Game2048-v0', render_mode='rgb_array')
     params = get_default_params()
     agent = DQLAgent(env, params)
+    start = datetime.datetime.now()
     agent.learn()
+    end = datetime.datetime.now()
+
+    print('training time: ', (end - start))
     torch.save(agent.model.state_dict(), 'dql_2048.pth')
     print(f'highest tile: {max(agent.max_tiles)}')
 

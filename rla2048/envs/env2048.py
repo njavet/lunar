@@ -8,7 +8,7 @@ from gymnasium.core import RenderFrame
 
 # project imports
 from rla2048.fts import merge_left, merge_down, merge_right, merge_up
-from rla2048.fts.heuristics import old_utility
+from rla2048.fts.heuristics import utility
 from rla2048 import config
 
 
@@ -63,42 +63,38 @@ class Env2048(gym.Env):
         return observation, info
 
     def step(self, action):
-        new_board, reward = self.action_to_merge(action)
-        self.score += reward
+        new_board, score = self.action_to_merge(action)
+        self.score += score
+
         if not np.array_equal(self.board, new_board):
-            ut = old_utility(self.board)
-            ut_new = old_utility(new_board)
             self.board = new_board
+            ut = utility(self.board)
             self.add_random_tile()
-            delta = ut_new - ut
-            reward += 0.5
-            reward += 18*delta
+            reward = score + ut + 1
         else:
             # punish nop actions
-            reward = -2
+            reward = -1
 
         observation = self.get_obs()
         info = self.get_info()
 
         if self.render_mode == 'human':
             self._render_frame()
-        if self.render_mode == 'ansi':
-            self.render_ansi()
 
         return observation, reward, self.game_over, False, info
 
     def action_to_merge(self, action):
         if action == 0:
-            new_board, reward = merge_left(self.board)
+            new_board, score = merge_left(self.board)
         elif action == 1:
-            new_board, reward = merge_down(self.board)
+            new_board, score = merge_down(self.board)
         elif action == 2:
-            new_board, reward = merge_right(self.board)
+            new_board, score = merge_right(self.board)
         elif action == 3:
-            new_board, reward = merge_up(self.board)
+            new_board, score = merge_up(self.board)
         else:
             raise ValueError(f'invalid action: {action}')
-        return new_board, reward
+        return new_board, score
 
     @property
     def game_over(self) -> bool:
@@ -113,11 +109,6 @@ class Env2048(gym.Env):
     def render(self) -> RenderFrame | list[RenderFrame] | None:
         if self.render_mode == 'rgb_array':
             return self._render_frame()
-
-    def render_ansi(self):
-        for i, row in enumerate(self.board):
-            r = ' | '.join([str(cell) for cell in row])
-            print(r)
 
     def _render_frame(self):
         if self.window is None and self.render_mode == 'human':
@@ -196,7 +187,8 @@ class Env2048(gym.Env):
             # predefined framerate.
             # The following line will automatically add a delay to
             # keep the framerate stable.
-        else:  # rgb_array
+        # rgb_array
+        else:
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
             )
