@@ -6,7 +6,7 @@ from gymnasium import spaces
 import pygame
 
 # project imports
-from rla2048.fts.merge import merge_left, merge_down, merge_right, merge_up
+from rla2048.fts import merge_left, merge_down, merge_right, merge_up
 
 
 class Actions(Enum):
@@ -96,7 +96,6 @@ class Env2048(gym.Env):
             if not np.array_equal(self.board, new_board):
                 return True
         return False
-
 
     def render(self):
         if self.render_mode == 'rgb_array':

@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 
 # project imports
-from rla2048.fts.merge import merge_left, merge_down, merge_right, merge_up
+from rla2048.fts import merge_left, merge_down, merge_right, merge_up
 
 
 class TestMerge(unittest.TestCase):
