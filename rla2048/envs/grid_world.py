@@ -2,62 +2,50 @@ from enum import Enum
 import gymnasium as gym
 from gymnasium import spaces
 import pygame
+import random
 import numpy as np
 
 
 class Actions(Enum):
-    right = 0
-    up = 1
-    left = 2
-    down = 3
+    left = 0
+    down = 1
+    right = 2
+    up = 3
 
 
-class GridWorldEnv(gym.Env):
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
+class Env2048(gym.Env):
+    metadata = {'render_modes': ['human', 'rgb_array', 'rgb_array_list'],
+                'render_fps': 4}
 
-    def __init__(self, render_mode=None, size=5):
-        self.size = size  # The size of the square grid
-        self.window_size = 512  # The size of the PyGame window
-
-        # Observations are dictionaries with the agent's and the target's location.
-        # Each location is encoded as an element of {0, ..., `size`}^2,
-        # i.e. MultiDiscrete([size, size]).
-        self.observation_space = spaces.Dict(
-            {
-                "agent": spaces.Box(0, size - 1, shape=(2,), dtype=int),
-                "target": spaces.Box(0, size - 1, shape=(2,), dtype=int),
-            }
-        )
-
-        # We have 4 actions, corresponding to "right", "up", "left", "down", "right"
+    def __init__(self, render_mode=None):
         self.action_space = spaces.Discrete(4)
-
-        """
-        The following dictionary maps abstract actions from `self.action_space` to 
-        the direction we will walk in if that action is taken.
-        i.e. 0 corresponds to "right", 1 to "up" etc.
-        """
-        self._action_to_direction = {
-            Actions.right.value: np.array([1, 0]),
-            Actions.up.value: np.array([0, 1]),
+        # 4x4 grid with 16bit onehot encoding
+        self.board = np.zeros((4, 4), dtype=np.uint16)
+        self.observation_space = spaces.MultiBinary(256)
+        self._action_to_merge = {
             Actions.left.value: np.array([-1, 0]),
             Actions.down.value: np.array([0, -1]),
+            Actions.right.value: np.array([1, 0]),
+            Actions.up.value: np.array([0, 1]),
         }
-
-        assert render_mode is None or render_mode in self.metadata["render_modes"]
+        self.window_size = 512
         self.render_mode = render_mode
-
-        """
-        If human-rendering is used, `self.window` will be a reference
-        to the window that we draw to. `self.clock` will be a clock that is used
-        to ensure that the environment is rendered at the correct framerate in
-        human-mode. They will remain `None` until human-mode is used for the
-        first time.
-        """
         self.window = None
         self.clock = None
 
+    def add_random_tile(self):
+        r, c = random.choice(np.argwhere(self.board == 0).tolist())
+        self.board[r, c] = 2 if random.random() < 0.9 else 4
+
+    def get_obs(self):
+        obs = np.zeros((4, 4, 16), dtype=np.int8)
+        rs, cs = np.where(self.board != 0)
+        one_hot = np.log2(self.board[rs, cs]).astype(np.int8)
+        obs[rs, cs, one_hot] = 1
+        return obs.flatten()
+
     def _get_obs(self):
+        one_hot = np.zeros((4, 4, 16))
         return {"agent": self._agent_location, "target": self._target_location}
 
     def _get_info(self):
