@@ -1,5 +1,6 @@
 from abc import ABC
 import numpy as np
+import torch
 import gymnasium as gym
 
 # project imports
@@ -32,6 +33,8 @@ class SchopenhauerAgent(ABC):
 
     def exec_step(self, state: np.ndarray, action: int) -> tuple[TrajectoryStep, bool]:
         next_state, reward, term, trunc, info = self.env.step(action)
+        next_state = torch.tensor(next_state, dtype=torch.float32).to('cuda')
+        reward = torch.tensor(reward, dtype=torch.float32).to('cuda')
         ts = TrajectoryStep(state=state,
                             action=int(action),
                             reward=reward,
@@ -45,6 +48,7 @@ class SchopenhauerAgent(ABC):
     def generate_trajectory(self, policy='optimal', record=False):
         self.reset_trajectory()
         state, info = self.env.reset()
+        state = torch.tensor(state, dtype=torch.float32).to('cuda')
         terminated = False
         while not terminated:
             action = self.policies[policy](state)

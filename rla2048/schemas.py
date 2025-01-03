@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 import numpy as np
+import torch
 from pathlib import Path
 
 
@@ -18,10 +19,10 @@ class Params(BaseModel):
 
 
 class TrajectoryStep(BaseModel):
-    state: np.ndarray
+    state: torch.Tensor
     action: int
-    reward: float
-    next_state: np.ndarray
+    reward: torch.Tensor
+    next_state: torch.Tensor
 
     class Config:
         arbitrary_types_allowed = True

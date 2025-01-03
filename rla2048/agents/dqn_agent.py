@@ -56,6 +56,7 @@ class DQLAgent(SchopenhauerAgent):
                               nn.Linear(256, 128),
                               nn.ReLU(),
                               nn.Linear(128, 4))
+        model.to('cuda')
         return model
 
     def remember(self, state, action, reward, next_state, done):
@@ -106,7 +107,7 @@ class DQLAgent(SchopenhauerAgent):
     def process_trajectory(self, episode):
         self.decay_epsilon()
         st = self.trajectory.steps[-1].next_state
-        st = st.reshape((4, 4, 16))
+        st = st.reshape((4, 4, 16)).cpu().numpy()
         inds = np.argwhere(st == 1)
         st = np.exp2(inds).astype(np.int32)
         tr = sum([ts.reward for ts in self.trajectory.steps])
@@ -119,6 +120,7 @@ class DQLAgent(SchopenhauerAgent):
             print(64*'-')
 
     def learn(self):
+        print(next(self.model.parameters()).device)
         self.max_tiles = []
         self.total_rewards = []
         for n in range(self.params.n_episodes):
