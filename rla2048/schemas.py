@@ -1,20 +1,21 @@
 from pydantic import BaseModel, Field
 import torch
-from pathlib import Path
 
 
-class Params(BaseModel):
+class OrchestratorParams(BaseModel):
     n_runs: int
     n_episodes: int
+    seed: int
+
+
+class LearnerParams(BaseModel):
     alpha: float
     gamma: float
     epsilon: float
     epsilon_min: float
     decay: float
-    seed: int
     batch_size: int
     update_target_steps: int
-    savefig_folder: Path
 
 
 class TrajectoryStep(BaseModel):
