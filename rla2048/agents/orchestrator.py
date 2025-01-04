@@ -1,4 +1,3 @@
-from abc import ABC
 import gymnasium as gym
 
 # project imports
@@ -6,7 +5,7 @@ from rla2048.schemas import OrchestratorParams, TrajectoryStep
 from rla2048.agents.learner import Learner
 
 
-class Orchestrator(ABC):
+class Orchestrator:
     def __init__(self,
                  env: gym.Env,
                  agent: Learner,

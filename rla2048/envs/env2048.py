@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Any, SupportsFloat
 
 import torch
 import random
@@ -7,7 +6,7 @@ import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 import pygame
-from gymnasium.core import RenderFrame, ObsType, ActType
+from gymnasium.core import RenderFrame
 
 # project imports
 from rla2048.fts import merge_left, merge_down, merge_right, merge_up
@@ -88,18 +87,7 @@ class Env2048(gym.Env):
 
         return observation, reward, self.game_over, False, info
 
-    def action_to_merge(self, action):
-        if action == 0:
-            new_board, score = merge_left(self.board)
-        elif action == 1:
-            new_board, score = merge_down(self.board)
-        elif action == 2:
-            new_board, score = merge_right(self.board)
-        elif action == 3:
-            new_board, score = merge_up(self.board)
-        else:
-            raise ValueError(f'invalid action: {action}')
-        return new_board, score
+
 
     @property
     def game_over(self) -> bool:

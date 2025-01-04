@@ -50,3 +50,17 @@ def merge_up(board: torch.Tensor) -> tuple[torch.Tensor, float]:
     left_rotated, score = merge_left(rotated)
     new_board = torch.rot90(left_rotated, -1)
     return new_board, score
+
+
+def execute_action(board: torch.Tensor, action: int) -> tuple[torch.Tensor, float]:
+    if action == 0:
+        new_board, score = merge_left(board)
+    elif action == 1:
+        new_board, score = merge_down(board)
+    elif action == 2:
+        new_board, score = merge_right(board)
+    elif action == 3:
+        new_board, score = merge_up(board)
+    else:
+        raise ValueError(f'invalid action: {action}')
+    return new_board, score
