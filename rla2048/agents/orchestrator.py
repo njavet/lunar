@@ -13,10 +13,8 @@ class Orchestrator:
         self.env = env
         self.agent = agent
         self.params = params
-        self.max_tiles = None
-        self.total_rewards = None
 
-    def run_episode(self):
+    def run_episode(self, episode):
         self.agent.reset_trajectory()
         state, info = self.env.reset()
         terminated = False
@@ -31,10 +29,8 @@ class Orchestrator:
             self.agent.process_step()
             state = next_state
             terminated = term or trunc
-        self.agent.process_episode()
+        self.agent.process_episode(episode)
 
     def train_agent(self):
-        self.max_tiles = []
-        self.total_rewards = []
         for n in range(self.params.n_episodes):
-            self.run_episode()
+            self.run_episode(n)

@@ -22,7 +22,7 @@ class Learner(ABC):
     def process_step(self) -> None:
         raise NotImplementedError
 
-    def process_episode(self) -> None:
+    def process_episode(self, episode: int) -> None:
         raise NotImplementedError
 
     def learn(self):

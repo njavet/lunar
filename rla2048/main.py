@@ -34,7 +34,7 @@ def train_dqn():
     orch_params = get_orchestrator_params()
     orchestrator = Orchestrator(env, agent, orch_params)
     orchestrator.train_agent()
-    print(f'highest tile: {max(orchestrator.max_tiles)}')
+    print(f'highest tile: {max(orchestrator.agent.max_tiles)}')
     torch.save(agent.model.state_dict(), 'dql_2048_cuda_2e15.pth')
     return
 

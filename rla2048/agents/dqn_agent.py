@@ -8,32 +8,33 @@ from collections import deque, defaultdict
 # project imports
 from rla2048.agents.learner import Learner
 from rla2048.schemas import LearnerParams
+from rla2048.dqn import DQN3
 
 
 class DQLAgent(Learner):
     def __init__(self, params: LearnerParams):
         super().__init__(params)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.model = self.create_model()
-        self.target_model = self.create_model()
+        self.model = DQN3(256, 4).to(self.device)
+        self.target_model = DQN3(256, 4).to(self.device)
         self.target_model.load_state_dict(self.model.state_dict())
-        self.memory = deque(maxlen=500000)
+        self.memory = deque(maxlen=params.memory_size)
         self.gamma = params.gamma
         self.epsilon = params.epsilon
         self.epsilon_decay = params.decay
         self.epsilon_min = params.epsilon_min
         self.batch_size = params.batch_size
-        self.update_target_steps = 16
+        self.update_target_steps = params.update_target_steps
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
         self.criterion = nn.MSELoss()
         self.trajectories = defaultdict(list)
         self.images = None
-        self.max_tiles = None
-        self.total_rewards = None
+        self.max_tiles = []
+        self.total_rewards = []
 
     def behave_policy(self, state: torch.Tensor) -> int:
         if np.random.rand() <= self.epsilon:
-            return self.env.action_space.sample()
+            return int(np.random.choice(range(4)))
         with torch.no_grad():
             q_values = self.model(state)
         return torch.argmax(q_values).item()
@@ -81,7 +82,7 @@ class DQLAgent(Learner):
         if len(self.trajectory.steps) % self.update_target_steps == 0:
             self.update_target_model()
 
-    def process_trajectory(self, episode):
+    def process_episode(self, episode):
         self.decay_epsilon()
         st = self.trajectory.steps[-1].next_state
         st = st.reshape((4, 4, 16)).cpu().numpy()
