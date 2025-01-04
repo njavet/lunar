@@ -1,11 +1,13 @@
 from enum import Enum
+from typing import Any, SupportsFloat
+
 import torch
 import random
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 import pygame
-from gymnasium.core import RenderFrame
+from gymnasium.core import RenderFrame, ObsType, ActType
 
 # project imports
 from rla2048.fts import merge_left, merge_down, merge_right, merge_up
@@ -70,9 +72,9 @@ class Env2048(gym.Env):
 
         if not torch.equal(self.board, new_board):
             self.board = new_board
-            #ut = utility(self.board)
+            ut = utility(self.board)
             self.add_random_tile()
-            reward = score + 1
+            reward = score + 1 + ut
         else:
             # punish nop actions
             reward = -1

@@ -18,7 +18,7 @@ def get_default_params():
                     epsilon_min=0.05,
                     decay=0.999999,
                     seed=0x101,
-                    batch_size=512,
+                    batch_size=1024,
                     update_target_steps=10,
                     savefig_folder=Path('images'))
     return params
@@ -41,7 +41,7 @@ def train():
     end = datetime.datetime.now()
     print(f'highest tile: {max(agent.max_tiles)}')
     print('training time: ', (end - start))
-    torch.save(agent.model.state_dict(), 'dql_2048_cuda_2e10.pth')
+    torch.save(agent.model.state_dict(), 'dql_2048_cuda_2e20.pth')
 
     return
     height, width = agent.images[0].shape[0], agent.images[0].shape[1]

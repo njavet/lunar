@@ -2,6 +2,7 @@ import numpy as np
 import random
 import torch
 import torch.nn as nn
+from torch.utils.data import DataLoader
 import torch.optim as optim
 from collections import deque, defaultdict
 
@@ -12,11 +13,13 @@ from rla2048.agents.schopenhauer import SchopenhauerAgent
 class DQLAgent(SchopenhauerAgent):
     def __init__(self, env, params):
         super().__init__(env, params)
+        torch.cuda.set_per_process_memory_fraction(0.95)
+        torch.amp.autocast(device_type='cuda')
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = self.create_model()
         self.target_model = self.create_model()
         self.target_model.load_state_dict(self.model.state_dict())
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=50000)
         self.gamma = params.gamma
         self.epsilon = params.epsilon
         self.epsilon_decay = params.decay
@@ -68,28 +71,22 @@ class DQLAgent(SchopenhauerAgent):
         if len(self.memory) < self.batch_size:
             return
         batch = random.sample(self.memory, self.batch_size)
-        states, targets = [], []
-        for state, action, reward, next_state, done in batch:
-            state_tensor = torch.FloatTensor(state)
-            next_state_tensor = torch.FloatTensor(next_state)
-            target = self.model(state_tensor.unsqueeze(0)).detach().clone()
-            if done:
-                target[0][action] = reward
-            else:
-                next_q_values = self.target_model(
-                    next_state_tensor.unsqueeze(0)
-                ).detach()
-                tmp = torch.max(next_q_values).item()
-                target[0][action] = reward + self.gamma * tmp
-            states.append(state_tensor)
-            targets.append(target[0])
+        states, actions, rewards, next_states, dones = map(
+            lambda x: torch.stack(x).to(self.device),
+            zip(*batch)
+        )
 
-        states = torch.stack(states)
-        targets = torch.stack(targets)
+        q_values = self.model(states)
+        with torch.no_grad():
+            next_q_values = self.target_model(next_states)
+            max_next_q_values = torch.max(next_q_values, dim=1)[0]
+
+        targets = q_values.clone()
+        for i in range(self.batch_size):
+            targets[i, actions[i]] = rewards[i] if dones[i] else rewards[i] + self.gamma * max_next_q_values[i]
 
         self.optimizer.zero_grad()
-        predictions = self.model(states)
-        loss = self.criterion(predictions, targets)
+        loss = self.criterion(q_values, targets)
         loss.backward()
         self.optimizer.step()
 

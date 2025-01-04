@@ -31,13 +31,13 @@ def monotonicity_heuristic(board: torch.Tensor) -> float:
     monotonicity = 0
 
     def calculate_inc(array):
-        if np.all([array[i] <= array[i + 1] for i in range(len(array) - 1)]):
+        if torch.all(array[:-1] <= array[1:]):
             return 1
         else:
             return 0
 
     def calculate_dec(array):
-        if np.all([array[i] >= array[i + 1] for i in range(len(array) - 1)]):
+        if torch.all(array[:-1] >= array[1:]):
             return 1
         else:
             return 0
@@ -45,7 +45,7 @@ def monotonicity_heuristic(board: torch.Tensor) -> float:
     for row in board:
         monotonicity += calculate_inc(row)
         monotonicity += calculate_dec(row)
-    for col in board.transpose():
+    for col in board.transpose(0, 1):
         monotonicity += calculate_inc(col)
         monotonicity += calculate_dec(col)
     if monotonicity > 0:
@@ -58,8 +58,8 @@ def corner_heuristic(board: torch.Tensor) -> float:
     weights = torch.tensor([[1, 0, 0, 1],
                             [0, 0, 0, 0],
                             [0, 0, 0, 0],
-                            [1, 0, 0, 1]])
-    cs = np.sum(board * weights)
+                            [1, 0, 0, 1]], device='cuda')
+    cs = torch.sum(board * weights)
     if cs > 0:
         return -1 / cs
     else:
@@ -68,14 +68,15 @@ def corner_heuristic(board: torch.Tensor) -> float:
 
 def utility(grid: torch.Tensor, weights: torch.Tensor = None) -> float:
     if weights is None:
-        weights = np.ones(5)
+        weights = torch.ones(5, device='cuda')
     max_tile = max_tile_heuristic(grid)
     zeros = zero_tile_heuristic(grid)
-    smooth = smoothness_heuristic(grid)
+    # smooth = smoothness_heuristic(grid)
+    smooth = 0
     mono = monotonicity_heuristic(grid)
     corner = corner_heuristic(grid)
-    res = weights * torch.Tensor([max_tile, zeros, smooth, mono, corner])
-    return np.sum(res)
+    res = weights * torch.tensor([max_tile, zeros, smooth, mono, corner], device='cuda')
+    return torch.sum(res).item()
 
 
 def old_utility(board: torch.Tensor) -> float:
