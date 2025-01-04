@@ -5,10 +5,10 @@ import numpy as np
 
 
 class Actions(Enum):
-    left = torch.tensor(0, dtype=torch.uint8)
-    down = torch.tensor(1, dtype=torch.uint8)
-    right = torch.tensor(2, dtype=torch.uint8)
-    up = torch.tensor(3, dtype=torch.uint8)
+    left = torch.tensor(0, dtype=torch.uint8, device='cuda')
+    down = torch.tensor(1, dtype=torch.uint8, device='cuda')
+    right = torch.tensor(2, dtype=torch.uint8, device='cuda')
+    up = torch.tensor(3, dtype=torch.uint8, device='cuda')
 
 
 def merge_left(board: torch.Tensor) -> tuple[torch.Tensor, float]:

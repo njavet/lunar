@@ -27,7 +27,7 @@ class Orchestrator:
                                 action=action,
                                 reward=reward,
                                 next_state=next_state,
-                                done=torch.tensor(terminated))
+                                done=torch.tensor(terminated, device='cuda'))
             self.agent.trajectory.steps.append(ts)
             self.agent.process_step()
             state = next_state
