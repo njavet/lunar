@@ -1,13 +1,13 @@
-import torch.nn as tnn
+import torch.nn as nn
 import torch.nn.functional as tf
 
 
-class DQN3(tnn.Module):
+class DQN3(nn.Module):
     def __init__(self, idim, odim):
         super(DQN3, self).__init__()
-        self.fc0 = tnn.Linear(idim, 512)
-        self.fc1 = tnn.Linear(512, idim)
-        self.fc2 = tnn.Linear(idim, odim)
+        self.fc0 = nn.Linear(idim, 512)
+        self.fc1 = nn.Linear(512, idim)
+        self.fc2 = nn.Linear(idim, odim)
 
     def forward(self, x):
         x0 = tf.relu(self.fc0(x))
@@ -16,13 +16,13 @@ class DQN3(tnn.Module):
         return x2
 
 
-class DQN4(tnn.Module):
+class DQN4(nn.Module):
     def __init__(self, idim, odim):
         super(DQN4, self).__init__()
-        self.fc0 = tnn.Linear(idim, 512)
-        self.fc1 = tnn.Linear(512, idim)
-        self.fc2 = tnn.Linear(idim, 128)
-        self.fc3 = tnn.Linear(128, odim)
+        self.fc0 = nn.Linear(idim, 512)
+        self.fc1 = nn.Linear(512, idim)
+        self.fc2 = nn.Linear(idim, 128)
+        self.fc3 = nn.Linear(128, odim)
 
     def forward(self, x):
         x0 = tf.relu(self.fc0(x))
