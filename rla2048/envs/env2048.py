@@ -14,8 +14,6 @@ from rla2048.fts.heuristics import utility
 from rla2048 import config
 
 
-
-
 class Env2048(gym.Env):
     metadata = {'render_modes': ['human', 'rgb_array', 'rgb_array_list', 'ansi'],
                 'render_fps': 4}
@@ -32,9 +30,6 @@ class Env2048(gym.Env):
         self.window = None
         self.clock = None
 
-    def add_random_tile(self):
-        r, c = random.choice((self.board == 0).nonzero(as_tuple=False).tolist())
-        self.board[r, c] = 2 if random.random() < 0.9 else 4
 
     def get_obs(self):
         obs = torch.zeros((4, 4, 16), device=self.device)

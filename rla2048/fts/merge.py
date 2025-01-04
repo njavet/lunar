@@ -1,5 +1,6 @@
 import torch
 from enum import Enum
+import random
 import numpy as np
 
 
@@ -82,3 +83,10 @@ def game_over(board: torch.Tensor) -> bool:
         if not torch.equal(board, new_board):
             return False
     return True
+
+
+def add_random_tile(board: torch.Tensor) -> torch.Tensor:
+    r, c = random.choice((board == 0).nonzero(as_tuple=False).tolist())
+    new_board = board.clone()
+    new_board[r, c] = 2 if random.random() < 0.9 else 4
+    return new_board
