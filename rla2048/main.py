@@ -16,7 +16,7 @@ def get_learner_params():
                            decay=0.9999,
                            batch_size=512,
                            memory_size=1000000,
-                           update_target_steps=10)
+                           update_target_steps=101)
     return params
 
 
@@ -35,7 +35,7 @@ def train():
     orchestrator = Orchestrator(env, agent, orch_params)
     orchestrator.train_agent()
     print(f'highest tile: {max(orchestrator.agent.max_tiles)}')
-    torch.save(agent.model.state_dict(), 'dql_2048_cuda_2e15.pth')
+    torch.save(agent.target_model.state_dict(), 'dql_2048_cuda_2e15.pth')
     return
 
 

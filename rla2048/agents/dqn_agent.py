@@ -15,20 +15,21 @@ class DQLAgent(Learner):
     def __init__(self, params: LearnerParams):
         super().__init__(params)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        print('DEEV', self.device)
-        self.model = DQN3(256, 4).to(self.device)
-        self.target_model = DQN3(256, 4).to(self.device)
-        self.target_model.load_state_dict(self.model.state_dict())
-        self.memory = deque(maxlen=params.memory_size)
         self.gamma = params.gamma
         self.epsilon = params.epsilon
         self.epsilon_decay = params.decay
         self.epsilon_min = params.epsilon_min
         self.batch_size = params.batch_size
         self.update_target_steps = params.update_target_steps
+        self.memory = deque(maxlen=params.memory_size)
+        # dqn
+        self.model = DQN3(256, 4).to(self.device)
+        self.target_model = DQN3(256, 4).to(self.device)
+        self.target_model.load_state_dict(self.model.state_dict())
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
         self.criterion = nn.MSELoss()
         self.trajectories = defaultdict(list)
+        # collection infos
         self.images = None
         self.max_tiles = []
         self.total_rewards = []
@@ -38,7 +39,8 @@ class DQLAgent(Learner):
             return int(np.random.choice(range(4)))
         with torch.no_grad():
             q_values = self.model(state)
-        return torch.argmax(q_values).item()
+        max_actions = (q_values == q_values.max()).nonzero(as_tuple=True)[0]
+        return int(max_actions[torch.randint(0, len(max_actions), (1,))].item())
 
     def remember(self,
                  state: torch.Tensor,
