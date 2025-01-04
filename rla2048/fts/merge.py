@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 
 def merge_left(board: torch.Tensor) -> tuple[torch.Tensor, float]:
@@ -24,10 +25,10 @@ def merge_left(board: torch.Tensor) -> tuple[torch.Tensor, float]:
     for row_ in board:
         shifted_row = row_[row_ != 0].tolist()
         merged_row, s_ = _merge_row(shifted_row, acc=[])
-        padded_row = torch.pad(merged_row, (0, 4 - len(merged_row)))
+        padded_row = np.pad(merged_row, (0, 4 - len(merged_row)))
         new_board.append(padded_row)
         score += s_
-    return torch.array(new_board, dtype=torch.int64), score
+    return torch.tensor(np.array(new_board), dtype=torch.int32), score
 
 
 def merge_right(board: torch.Tensor) -> tuple[torch.Tensor, float]:
