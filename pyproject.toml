@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "rla2048"
+version = "0.1.0"
+description = ""
+authors = ["Noe Javet <np.javet@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+gymnasium = "^1.0.0"
+pre-commit = "^4.0.1"
+pygame = "^2.6.1"
+torch = "^2.5.1"
+pydantic = "^2.10.4"
+matplotlib = "^3.10.0"
+seaborn = "^0.13.2"
+opencv-python = "^4.10.0.84"
+rich = "^13.9.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+train = "rla2048.main:train"
+play = "rla2048.main:play"
