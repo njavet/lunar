@@ -47,8 +47,7 @@ class DQLAgent(SchopenhauerAgent):
             q_values = self.model(state)
         return torch.argmax(q_values).item()
 
-    @staticmethod
-    def create_model():
+    def create_model(self):
         model = nn.Sequential(nn.Linear(256, 512),
                               nn.ReLU(),
                               nn.Linear(512, 256),
@@ -56,10 +55,15 @@ class DQLAgent(SchopenhauerAgent):
                               nn.Linear(256, 128),
                               nn.ReLU(),
                               nn.Linear(128, 4))
-        model.to('cuda')
+        model.to(self.device)
         return model
 
-    def remember(self, state, action, reward, next_state, done):
+    def remember(self,
+                 state: torch.Tensor,
+                 action: int,
+                 reward: torch.Tensor,
+                 next_state: torch.Tensor,
+                 done: bool) -> None:
         self.memory.append((state, action, reward, next_state, done))
 
     def replay(self):
@@ -74,8 +78,11 @@ class DQLAgent(SchopenhauerAgent):
             if done:
                 target[0][action] = reward
             else:
-                next_q_values = self.target_model(next_state_tensor.unsqueeze(0)).detach()
-                target[0][action] = reward + self.gamma * torch.max(next_q_values).item()
+                next_q_values = self.target_model(
+                    next_state_tensor.unsqueeze(0)
+                ).detach()
+                tmp = torch.max(next_q_values).item()
+                target[0][action] = reward + self.gamma * tmp
             states.append(state_tensor)
             targets.append(target[0])
 
@@ -95,11 +102,7 @@ class DQLAgent(SchopenhauerAgent):
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
-    def process_step(self, record=False):
-        if record:
-            img = self.env.render()
-            self.images.append(img)
-
+    def process_step(self):
         self.replay()
         if len(self.trajectory.steps) % self.update_target_steps == 0:
             self.update_target_model()
@@ -120,14 +123,9 @@ class DQLAgent(SchopenhauerAgent):
             print(64*'-')
 
     def learn(self):
-        print(next(self.model.parameters()).device)
         self.max_tiles = []
         self.total_rewards = []
         for n in range(self.params.n_episodes):
             self.generate_trajectory(policy='behave')
             self.trajectories[n] = self.trajectory
             self.process_trajectory(n)
-
-    def record_video(self):
-        self.images = []
-        self.generate_trajectory(policy='behave', record=True)
