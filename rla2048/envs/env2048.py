@@ -1,7 +1,4 @@
-from enum import Enum
-
 import torch
-import random
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
@@ -9,8 +6,7 @@ import pygame
 from gymnasium.core import RenderFrame
 
 # project imports
-from rla2048.fts import merge_left, merge_down, merge_right, merge_up
-from rla2048.fts.heuristics import utility
+from rla2048.fts import merge
 from rla2048 import config
 
 
@@ -30,7 +26,6 @@ class Env2048(gym.Env):
         self.window = None
         self.clock = None
 
-
     def get_obs(self):
         obs = torch.zeros((4, 4, 16), device=self.device)
         rs, cs = (self.board != 0).nonzero(as_tuple=True)
@@ -45,8 +40,8 @@ class Env2048(gym.Env):
         super().reset(seed=seed)
         self.board = torch.zeros((4, 4), device=self.device)
         self.score = 0
-        self.add_random_tile()
-        self.add_random_tile()
+        self.board = merge.add_random_tile(self.board)
+        self.board = merge.add_random_tile(self.board)
         observation = self.get_obs()
         info = self.get_info()
 
@@ -56,28 +51,24 @@ class Env2048(gym.Env):
         return observation, info
 
     def step(self, action: int) -> tuple[torch.Tensor, torch.Tensor, bool, bool, dict]:
-        new_board, score = self.action_to_merge(action)
+        new_board, score = merge.execute_action(self.board, action)
         self.score += score
 
         if not torch.equal(self.board, new_board):
-            self.board = new_board
-            ut = utility(self.board)
-            self.add_random_tile()
-            reward = score + 1 + ut
+            self.board = merge.add_random_tile(new_board)
+            reward = score + 1
         else:
-            # punish nop actions
             reward = -1
 
-        reward = torch.tensor(reward, device=self.device)
         observation = self.get_obs()
+        reward = torch.tensor(reward, device=self.device)
+        game_over = merge.game_over(self.board)
         info = self.get_info()
 
         if self.render_mode == 'human':
             self._render_frame()
 
-        return observation, reward, self.game_over, False, info
-
-
+        return observation, reward, game_over, False, info
 
     def render(self) -> RenderFrame | list[RenderFrame] | None:
         if self.render_mode == 'rgb_array':
