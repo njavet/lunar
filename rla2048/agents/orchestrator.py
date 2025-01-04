@@ -1,6 +1,4 @@
 from abc import ABC
-import torch
-from typing import Union
 import gymnasium as gym
 
 # project imports
@@ -17,29 +15,20 @@ class Orchestrator(ABC):
         self.agent = agent
         self.params = params
 
-    def exec_step(self, state: torch.Tensor) -> bool:
-        action = self.agent.policy(state)
-        next_state, reward, term, trunc, info = self.env.step(action)
-        ts = TrajectoryStep(state=state,
-                            action=action,
-                            reward=reward,
-                            next_state=next_state)
-        self.agent.trajectory.steps.append(ts)
-        return term or trunc
-
-    def process_step(self):
-        pass
-
-    def generate_trajectory(self, policy='optimal'):
-        self.reset_trajectory()
+    def run_episode(self):
+        self.agent.reset_trajectory()
         state, info = self.env.reset()
         terminated = False
         while not terminated:
-            action = self.policies[policy](state)
-            ts, terminated = self.exec_step(state, action)
-            self.trajectory.steps.append(ts)
-            self.process_step()
-            state = ts.next_state
+            action = self.agent.policy(state)
+            next_state, reward, term, trunc, info = self.env.step(action)
+            ts = TrajectoryStep(state=state,
+                                action=action,
+                                reward=reward,
+                                next_state=next_state)
+            self.agent.trajectory.steps.append(ts)
+            self.agent.process_step()
+            state = next_state
+            terminated = term or trunc
+        self.agent.process_episode()
 
-    def process_trajectory(self, episode):
-        pass
