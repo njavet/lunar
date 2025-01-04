@@ -2,17 +2,17 @@ import numpy as np
 import random
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
 import torch.optim as optim
 from collections import deque, defaultdict
 
 # project imports
-from rla2048.agents.schopenhauer import SchopenhauerAgent
+from rla2048.agents.learner import Learner
+from rla2048.schemas import LearnerParams
 
 
-class DQLAgent(SchopenhauerAgent):
-    def __init__(self, env, params):
-        super().__init__(env, params)
+class DQLAgent(Learner):
+    def __init__(self, params: LearnerParams):
+        super().__init__(params)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = self.create_model()
         self.target_model = self.create_model()
@@ -31,31 +31,12 @@ class DQLAgent(SchopenhauerAgent):
         self.max_tiles = None
         self.total_rewards = None
 
-    def optimal_policy(self, state: np.ndarray) -> int:
-        if np.random.rand() <= 0.1:
-            return self.env.action_space.sample()
-        with torch.no_grad():
-            q_values = self.model(state)
-        print('Q values', q_values)
-        return torch.argmax(q_values).item()
-
     def behave_policy(self, state: torch.Tensor) -> int:
         if np.random.rand() <= self.epsilon:
             return self.env.action_space.sample()
         with torch.no_grad():
             q_values = self.model(state)
         return torch.argmax(q_values).item()
-
-    def create_model(self):
-        model = nn.Sequential(nn.Linear(256, 512),
-                              nn.ReLU(),
-                              nn.Linear(512, 256),
-                              nn.ReLU(),
-                              nn.Linear(256, 128),
-                              nn.ReLU(),
-                              nn.Linear(128, 4))
-        model.to(self.device)
-        return model
 
     def remember(self,
                  state: torch.Tensor,
