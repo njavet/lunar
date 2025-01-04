@@ -15,6 +15,7 @@ class LearnerParams(BaseModel):
     epsilon_min: float
     decay: float
     batch_size: int
+    memory_size: int
     update_target_steps: int
 
 

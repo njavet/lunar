@@ -96,10 +96,3 @@ class DQLAgent(Learner):
             print(f'Highest tile: {int(so[0])}, highest reward: {so[1]}')
             print(64*'-')
 
-    def learn(self):
-        self.max_tiles = []
-        self.total_rewards = []
-        for n in range(self.params.n_episodes):
-            self.generate_trajectory(policy='behave')
-            self.trajectories[n] = self.trajectory
-            self.process_trajectory(n)
