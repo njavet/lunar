@@ -89,7 +89,7 @@ class DQLAgent(Learner):
         inds = (st == 1).nonzero(as_tuple=False)
         st = torch.pow(2, inds[:, 2]).to(torch.int32)
         tr = sum([ts.reward for ts in self.trajectory.steps])
-        self.max_tiles.append((np.max(st), tr))
+        self.max_tiles.append((st.max().item(), tr))
         self.total_rewards.append(tr)
         if episode % 100 == 0:
             print(f'episode {episode} with epsilon: {self.epsilon}')
