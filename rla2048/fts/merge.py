@@ -28,7 +28,7 @@ def merge_left(board: torch.Tensor) -> tuple[torch.Tensor, float]:
         padded_row = np.pad(merged_row, (0, 4 - len(merged_row)))
         new_board.append(padded_row)
         score += s_
-    return torch.tensor(np.array(new_board), dtype=torch.int32), score
+    return torch.tensor(np.array(new_board), device='cuda'), score
 
 
 def merge_right(board: torch.Tensor) -> tuple[torch.Tensor, float]:

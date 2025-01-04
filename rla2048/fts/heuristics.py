@@ -1,21 +1,23 @@
 import numpy as np
+import torch
 
 
-def max_tile_heuristic(board: np.array) -> float:
-    return -1 / np.max(board)
+def max_tile_heuristic(board: torch.Tensor) -> float:
+    return -1 / torch.max(board)
 
 
-def zero_tile_heuristic(board: np.array) -> float:
-    return np.count_nonzero(board) / 16
+def zero_tile_heuristic(board: torch.Tensor) -> float:
+    tmp = torch.count_nonzero(board) / 16
+    return tmp.item()
 
 
-def smoothness_heuristic(board: np.array) -> float:
+def smoothness_heuristic(board: torch.Tensor) -> float:
     distances = 0
     for row in board:
         for i in range(3):
             if row[i] > 0 and row[i + 1] > 0:
                 distances += abs(row[i] - row[i + 1])
-    for col in board.transpose():
+    for col in board.transpose(4, 4):
         for i in range(3):
             if col[i] > 0 and col[i + 1] > 0:
                 distances += abs(col[i] - col[i + 1])
@@ -25,7 +27,7 @@ def smoothness_heuristic(board: np.array) -> float:
         return 1
 
 
-def monotonicity_heuristic(board: np.ndarray) -> float:
+def monotonicity_heuristic(board: torch.Tensor) -> float:
     monotonicity = 0
 
     def calculate_inc(array):
@@ -52,11 +54,11 @@ def monotonicity_heuristic(board: np.ndarray) -> float:
         return -1
 
 
-def corner_heuristic(board: np.array) -> float:
-    weights = np.array([[1, 0, 0, 1],
-                        [0, 0, 0, 0],
-                        [0, 0, 0, 0],
-                        [1, 0, 0, 1]])
+def corner_heuristic(board: torch.Tensor) -> float:
+    weights = torch.tensor([[1, 0, 0, 1],
+                            [0, 0, 0, 0],
+                            [0, 0, 0, 0],
+                            [1, 0, 0, 1]])
     cs = np.sum(board * weights)
     if cs > 0:
         return -1 / cs
@@ -64,7 +66,7 @@ def corner_heuristic(board: np.array) -> float:
         return -1
 
 
-def utility(grid: np.ndarray, weights: np.ndarray = None) -> float:
+def utility(grid: torch.Tensor, weights: torch.Tensor = None) -> float:
     if weights is None:
         weights = np.ones(5)
     max_tile = max_tile_heuristic(grid)
@@ -72,12 +74,12 @@ def utility(grid: np.ndarray, weights: np.ndarray = None) -> float:
     smooth = smoothness_heuristic(grid)
     mono = monotonicity_heuristic(grid)
     corner = corner_heuristic(grid)
-    res = weights * np.array([max_tile, zeros, smooth, mono, corner])
+    res = weights * torch.Tensor([max_tile, zeros, smooth, mono, corner])
     return np.sum(res)
 
 
-def old_utility(board: np.array) -> float:
-    def helper(seq: np.ndarray) -> float:
+def old_utility(board: torch.Tensor) -> float:
+    def helper(seq: torch.Tensor) -> float:
         # number of zeros heuristic
         zeros = np.sum(seq == 0)
         # higher tiles are better

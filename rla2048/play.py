@@ -1,7 +1,6 @@
 import gymnasium as gym
 import datetime
 import torch
-import time
 from pathlib import Path
 import cv2
 
@@ -44,7 +43,7 @@ def train():
     print('training time: ', (end - start))
     torch.save(agent.model.state_dict(), 'dql_2048_cuda_2e10.pth')
 
-    agent.record_video()
+    return
     height, width = agent.images[0].shape[0], agent.images[0].shape[1]
     video = cv2.VideoWriter('dqn2048.mp4',
                             cv2.VideoWriter_fourcc(*'mp4v'),

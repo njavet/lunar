@@ -12,8 +12,8 @@ from rla2048.agents.schopenhauer import SchopenhauerAgent
 class DQLAgent(SchopenhauerAgent):
     def __init__(self, env, params):
         super().__init__(env, params)
-        self.model = self.create_model()
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.model = self.create_model()
         self.target_model = self.create_model()
         self.target_model.load_state_dict(self.model.state_dict())
         self.memory = deque(maxlen=2000)
@@ -33,7 +33,6 @@ class DQLAgent(SchopenhauerAgent):
     def optimal_policy(self, state: np.ndarray) -> int:
         if np.random.rand() <= 0.1:
             return self.env.action_space.sample()
-        state = torch.FloatTensor(state).unsqueeze(0)
         with torch.no_grad():
             q_values = self.model(state)
         print('Q values', q_values)
@@ -42,7 +41,6 @@ class DQLAgent(SchopenhauerAgent):
     def behave_policy(self, state: torch.Tensor) -> int:
         if np.random.rand() <= self.epsilon:
             return self.env.action_space.sample()
-        state = torch.FloatTensor(state).unsqueeze(0)
         with torch.no_grad():
             q_values = self.model(state)
         return torch.argmax(q_values).item()

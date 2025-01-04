@@ -1,4 +1,5 @@
 from enum import Enum
+import torch
 import random
 import numpy as np
 import gymnasium as gym
@@ -24,9 +25,10 @@ class Env2048(gym.Env):
                 'render_fps': 4}
 
     def __init__(self, render_mode=None):
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.action_space = spaces.Discrete(4)
         # 4x4 grid with 16bit onehot encoding
-        self.board = np.zeros((4, 4), dtype=np.int64)
+        self.board = torch.zeros((4, 4), device=self.device)
         self.score = 0
         self.observation_space = spaces.MultiBinary(256)
         self.window_size = 512
@@ -35,13 +37,13 @@ class Env2048(gym.Env):
         self.clock = None
 
     def add_random_tile(self):
-        r, c = random.choice(np.argwhere(self.board == 0).tolist())
+        r, c = random.choice((self.board == 0).nonzero(as_tuple=False).tolist())
         self.board[r, c] = 2 if random.random() < 0.9 else 4
 
     def get_obs(self):
-        obs = np.zeros((4, 4, 16), dtype=np.int8)
-        rs, cs = np.where(self.board != 0)
-        one_hot = np.log2(self.board[rs, cs]).astype(np.int8)
+        obs = torch.zeros((4, 4, 16), device=self.device)
+        rs, cs = (self.board != 0).nonzero(as_tuple=True)
+        one_hot = self.board[rs, cs].log2().to(torch.long)
         obs[rs, cs, one_hot] = 1
         return obs.flatten()
 
@@ -50,7 +52,7 @@ class Env2048(gym.Env):
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self.board = np.zeros((4, 4), dtype=np.int64)
+        self.board = torch.zeros((4, 4), device=self.device)
         self.score = 0
         self.add_random_tile()
         self.add_random_tile()
@@ -62,19 +64,20 @@ class Env2048(gym.Env):
 
         return observation, info
 
-    def step(self, action):
+    def step(self, action: int) -> tuple[torch.Tensor, torch.Tensor, bool, bool, dict]:
         new_board, score = self.action_to_merge(action)
         self.score += score
 
-        if not np.array_equal(self.board, new_board):
+        if not torch.equal(self.board, new_board):
             self.board = new_board
-            ut = utility(self.board)
+            #ut = utility(self.board)
             self.add_random_tile()
-            reward = score + ut + 1
+            reward = score + 1
         else:
             # punish nop actions
             reward = -1
 
+        reward = torch.tensor(reward, device=self.device)
         observation = self.get_obs()
         info = self.get_info()
 
@@ -98,11 +101,11 @@ class Env2048(gym.Env):
 
     @property
     def game_over(self) -> bool:
-        if np.any(self.board == 0):
+        if torch.any(self.board == 0):
             return False
         for action in Actions:
             new_board, _ = self.action_to_merge(action.value)
-            if not np.array_equal(self.board, new_board):
+            if not torch.equal(self.board, new_board):
                 return False
         return True
 
