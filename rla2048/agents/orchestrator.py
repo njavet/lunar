@@ -21,14 +21,15 @@ class Orchestrator:
         while not terminated:
             action = self.agent.policy(state)
             next_state, reward, term, trunc, info = self.env.step(action)
+            terminated = term or trunc
             ts = TrajectoryStep(state=state,
                                 action=action,
                                 reward=reward,
-                                next_state=next_state)
+                                next_state=next_state,
+                                done=terminated)
             self.agent.trajectory.steps.append(ts)
             self.agent.process_step()
             state = next_state
-            terminated = term or trunc
         self.agent.process_episode(episode)
 
     def train_agent(self):

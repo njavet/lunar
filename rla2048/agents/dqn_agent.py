@@ -42,13 +42,11 @@ class DQLAgent(Learner):
         max_actions = (q_values == q_values.max()).nonzero(as_tuple=True)[0]
         return int(max_actions[torch.randint(0, len(max_actions), (1,))].item())
 
-    def remember(self,
-                 state: torch.Tensor,
-                 action: int,
-                 reward: torch.Tensor,
-                 next_state: torch.Tensor,
-                 done: bool) -> None:
-        self.memory.append((state, action, reward, next_state, done))
+    def remember(self):
+        ts = self.trajectory.steps[-1]
+        self.memory.append(
+            (ts.state, ts.action, ts.reward, ts.next_state, ts.done)
+        )
 
     def replay(self):
         if len(self.memory) < self.batch_size:
@@ -81,6 +79,7 @@ class DQLAgent(Learner):
             self.epsilon *= self.epsilon_decay
 
     def process_step(self):
+        self.remember()
         self.replay()
         if len(self.trajectory.steps) % self.update_target_steps == 0:
             self.update_target_model()

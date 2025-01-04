@@ -24,6 +24,7 @@ class TrajectoryStep(BaseModel):
     action: int
     reward: torch.Tensor
     next_state: torch.Tensor
+    done: bool
 
     class Config:
         arbitrary_types_allowed = True
