@@ -13,7 +13,7 @@ def get_learner_params():
                            gamma=0.99,
                            epsilon=1.0,
                            epsilon_min=0.05,
-                           decay=0.9999,
+                           decay=0.998,
                            batch_size=512,
                            memory_size=1000000,
                            update_target_steps=101)
@@ -22,7 +22,7 @@ def get_learner_params():
 
 def get_orchestrator_params():
     params = OrchestratorParams(n_runs=0,
-                                n_episodes=2**15,
+                                n_episodes=2**11,
                                 seed=0x101)
     return params
 
@@ -34,9 +34,7 @@ def train():
     orch_params = get_orchestrator_params()
     orchestrator = Orchestrator(env, agent, orch_params)
     orchestrator.train_agent()
-    print(f'highest tile: {max(orchestrator.agent.max_tiles)}')
-    torch.save(agent.target_model.state_dict(), 'dql_2048_cuda_2e15.pth')
-    return
+    torch.save(agent.target_model.state_dict(), 'dql_2048_cuda_2e11.pth')
 
 
 def record_video():

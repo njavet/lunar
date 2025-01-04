@@ -62,7 +62,6 @@ def merge_up(board: torch.Tensor) -> tuple[torch.Tensor, float]:
 
 
 def execute_action(board: torch.Tensor, action: torch.Tensor) -> tuple[torch.Tensor, float]:
-    action = int(action.item())
     if action == 0:
         new_board, score = merge_left(board)
     elif action == 1:

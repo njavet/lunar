@@ -30,17 +30,14 @@ class DQLAgent(Learner):
         self.criterion = nn.MSELoss()
         self.trajectories = defaultdict(list)
         # collection infos
-        self.images = None
-        self.max_tiles = []
-        self.total_rewards = []
 
     def policy(self, state: torch.Tensor) -> torch.Tensor:
         if np.random.rand() <= self.epsilon:
-            return torch.randint(0, 4, (1,))
+            return torch.randint(0, 4, (1,), device=self.device)
         with torch.no_grad():
             q_values = self.model(state)
         max_actions = (q_values == q_values.max()).nonzero(as_tuple=True)[0]
-        return max_actions[torch.randint(0, len(max_actions), (1,))]
+        return max_actions[torch.randint(0, len(max_actions), (1,), device='cuda')]
 
     def remember(self):
         ts = self.trajectory.steps[-1]
@@ -86,15 +83,8 @@ class DQLAgent(Learner):
 
     def process_episode(self, episode):
         self.decay_epsilon()
-        st = self.trajectory.steps[-1].next_state.reshape((4, 4, 16))
-        inds = (st == 1).nonzero(as_tuple=False)
-        st = torch.pow(2, inds[:, 2]).to(torch.int32)
-        tr = sum([ts.reward for ts in self.trajectory.steps])
-        self.max_tiles.append((st.max().item(), tr))
-        self.total_rewards.append(tr)
-        if episode % 100 == 0:
+        if episode % 50 == 0:
             print(f'episode {episode} with epsilon: {self.epsilon}')
-            so = sorted(self.max_tiles, reverse=True)[0]
-            print(f'Highest tile: {int(so[0])}, highest reward: {so[1]}')
+            #so = sorted(self.max_tiles, reverse=True)[0]
+            #print(f'Highest tile: {int(so[0])}, highest reward: {so[1]}')
             print(64*'-')
-
