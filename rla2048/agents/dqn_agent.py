@@ -1,5 +1,4 @@
 import numpy as np
-import time
 import random
 import torch
 import torch.nn as nn
@@ -14,6 +13,7 @@ class DQLAgent(SchopenhauerAgent):
     def __init__(self, env, params):
         super().__init__(env, params)
         self.model = self.create_model()
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.target_model = self.create_model()
         self.target_model.load_state_dict(self.model.state_dict())
         self.memory = deque(maxlen=2000)

@@ -41,20 +41,18 @@ class SchopenhauerAgent(ABC):
         done = term or trunc
         return ts, done
 
-    def process_step(self, record=False):
+    def process_step(self):
         pass
 
-    def generate_trajectory(self, policy='optimal', record=False):
+    def generate_trajectory(self, policy='optimal'):
         self.reset_trajectory()
         state, info = self.env.reset()
-        state = torch.tensor(state, dtype=torch.float32).to('cuda')
         terminated = False
         while not terminated:
             action = self.policies[policy](state)
             ts, terminated = self.exec_step(state, action)
             self.trajectory.steps.append(ts)
-            # the agent might want to do something after each step
-            self.process_step(record)
+            self.process_step()
             state = ts.next_state
 
     def process_trajectory(self, episode):
