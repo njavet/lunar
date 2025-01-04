@@ -11,14 +11,14 @@ from rla2048.schemas import Params
 
 def get_default_params():
     params = Params(n_runs=32,
-                    n_episodes=2**20,
+                    n_episodes=2**16,
                     alpha=0.1,
                     gamma=0.99,
                     epsilon=1,
                     epsilon_min=0.05,
-                    decay=0.999999,
+                    decay=0.9999,
                     seed=0x101,
-                    batch_size=1024,
+                    batch_size=2048,
                     update_target_steps=10,
                     savefig_folder=Path('images'))
     return params
@@ -41,7 +41,7 @@ def train():
     end = datetime.datetime.now()
     print(f'highest tile: {max(agent.max_tiles)}')
     print('training time: ', (end - start))
-    torch.save(agent.model.state_dict(), 'dql_2048_cuda_2e20.pth')
+    torch.save(agent.model.state_dict(), 'dql_2048_cuda_2e16.pth')
 
     return
     height, width = agent.images[0].shape[0], agent.images[0].shape[1]

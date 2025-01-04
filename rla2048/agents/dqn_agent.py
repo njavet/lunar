@@ -13,13 +13,11 @@ from rla2048.agents.schopenhauer import SchopenhauerAgent
 class DQLAgent(SchopenhauerAgent):
     def __init__(self, env, params):
         super().__init__(env, params)
-        torch.cuda.set_per_process_memory_fraction(0.95)
-        torch.amp.autocast(device_type='cuda')
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = self.create_model()
         self.target_model = self.create_model()
         self.target_model.load_state_dict(self.model.state_dict())
-        self.memory = deque(maxlen=50000)
+        self.memory = deque(maxlen=500000)
         self.gamma = params.gamma
         self.epsilon = params.epsilon
         self.epsilon_decay = params.decay
