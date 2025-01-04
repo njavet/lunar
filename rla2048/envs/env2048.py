@@ -14,11 +14,6 @@ from rla2048.fts.heuristics import utility
 from rla2048 import config
 
 
-class Actions(Enum):
-    left = 0
-    down = 1
-    right = 2
-    up = 3
 
 
 class Env2048(gym.Env):
@@ -88,16 +83,6 @@ class Env2048(gym.Env):
         return observation, reward, self.game_over, False, info
 
 
-
-    @property
-    def game_over(self) -> bool:
-        if torch.any(self.board == 0):
-            return False
-        for action in Actions:
-            new_board, _ = self.action_to_merge(action.value)
-            if not torch.equal(self.board, new_board):
-                return False
-        return True
 
     def render(self) -> RenderFrame | list[RenderFrame] | None:
         if self.render_mode == 'rgb_array':

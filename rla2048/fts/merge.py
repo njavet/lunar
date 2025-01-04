@@ -1,5 +1,13 @@
 import torch
+from enum import Enum
 import numpy as np
+
+
+class Actions(Enum):
+    left = 0
+    down = 1
+    right = 2
+    up = 3
 
 
 def merge_left(board: torch.Tensor) -> tuple[torch.Tensor, float]:
@@ -64,3 +72,13 @@ def execute_action(board: torch.Tensor, action: int) -> tuple[torch.Tensor, floa
     else:
         raise ValueError(f'invalid action: {action}')
     return new_board, score
+
+
+def game_over(board: torch.Tensor) -> bool:
+    if torch.any(board == 0):
+        return False
+    for action in Actions:
+        new_board, _ = execute_action(board, action.value)
+        if not torch.equal(board, new_board):
+            return False
+    return True
