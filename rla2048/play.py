@@ -18,7 +18,7 @@ def get_default_params():
                     epsilon_min=0.05,
                     decay=0.999999,
                     seed=0x101,
-                    batch_size=64,
+                    batch_size=512,
                     update_target_steps=10,
                     savefig_folder=Path('images'))
     return params
