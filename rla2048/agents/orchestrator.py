@@ -1,39 +1,31 @@
 from abc import ABC
 import torch
+from typing import Union
 import gymnasium as gym
 
 # project imports
-from rla2048.schemas import Trajectory, TrajectoryStep, Params
+from rla2048.schemas import OrchestratorParams, TrajectoryStep
+from rla2048.agents.learner import Learner
 
 
 class Orchestrator(ABC):
-    def __init__(self, env: gym.Env, params: Params):
-        """ params could be seen as given by nature / god """
+    def __init__(self,
+                 env: gym.Env,
+                 agent: Learner,
+                 params: OrchestratorParams) -> None:
         self.env = env
+        self.agent = agent
         self.params = params
-        self.trajectory = Trajectory()
-        self.policies = {'optimal': self.optimal_policy,
-                         'behave': self.behave_policy}
 
-    def optimal_policy(self, state: torch.Tensor) -> int:
-        raise NotImplementedError
-
-    def behave_policy(self, state: torch.Tensor) -> int:
-        raise NotImplementedError
-
-    def reset_trajectory(self):
-        self.trajectory = Trajectory()
-
-    def exec_step(self,
-                  state: torch.Tensor,
-                  action: int) -> tuple[TrajectoryStep, bool]:
+    def exec_step(self, state: torch.Tensor) -> bool:
+        action = self.agent.policy(state)
         next_state, reward, term, trunc, info = self.env.step(action)
         ts = TrajectoryStep(state=state,
                             action=action,
                             reward=reward,
                             next_state=next_state)
-        done = term or trunc
-        return ts, done
+        self.agent.trajectory.steps.append(ts)
+        return term or trunc
 
     def process_step(self):
         pass
