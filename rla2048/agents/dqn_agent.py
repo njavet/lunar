@@ -15,6 +15,7 @@ class DQLAgent(Learner):
     def __init__(self, params: LearnerParams):
         super().__init__(params)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print('DEEV', self.device)
         self.model = DQN3(256, 4).to(self.device)
         self.target_model = DQN3(256, 4).to(self.device)
         self.target_model.load_state_dict(self.model.state_dict())
@@ -84,10 +85,9 @@ class DQLAgent(Learner):
 
     def process_episode(self, episode):
         self.decay_epsilon()
-        st = self.trajectory.steps[-1].next_state
-        st = st.reshape((4, 4, 16)).cpu().numpy()
-        inds = np.argwhere(st == 1)
-        st = np.exp2(inds).astype(np.int32)
+        st = self.trajectory.steps[-1].next_state.reshape((4, 4, 16))
+        inds = (st == 1).nonzero(as_tuple=False)
+        st = torch.pow(2, inds[:, 2]).to(torch.int32)
         tr = sum([ts.reward for ts in self.trajectory.steps])
         self.max_tiles.append((np.max(st), tr))
         self.total_rewards.append(tr)

@@ -13,9 +13,9 @@ def get_learner_params():
                            gamma=0.99,
                            epsilon=1.0,
                            epsilon_min=0.05,
-                           decay=0.99999,
-                           batch_size=1024,
-                           memory_size=100000,
+                           decay=0.9999,
+                           batch_size=512,
+                           memory_size=1000000,
                            update_target_steps=10)
     return params
 
