@@ -1,5 +1,4 @@
 from abc import ABC
-import numpy as np
 import torch
 import gymnasium as gym
 
@@ -31,12 +30,12 @@ class SchopenhauerAgent(ABC):
     def reset_trajectory(self):
         self.trajectory = Trajectory()
 
-    def exec_step(self, state: torch.Tensor, action: int) -> tuple[TrajectoryStep, bool]:
+    def exec_step(self,
+                  state: torch.Tensor,
+                  action: int) -> tuple[TrajectoryStep, bool]:
         next_state, reward, term, trunc, info = self.env.step(action)
-        next_state = torch.tensor(next_state, dtype=torch.float32).to('cuda')
-        reward = torch.tensor(reward, dtype=torch.float32).to('cuda')
         ts = TrajectoryStep(state=state,
-                            action=int(action),
+                            action=action,
                             reward=reward,
                             next_state=next_state)
         done = term or trunc

@@ -12,7 +12,7 @@ from rla2048.schemas import Params
 
 def get_default_params():
     params = Params(n_runs=32,
-                    n_episodes=2**25,
+                    n_episodes=2**20,
                     alpha=0.1,
                     gamma=0.99,
                     epsilon=1,

@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-import numpy as np
 import torch
 from pathlib import Path
 
