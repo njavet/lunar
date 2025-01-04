@@ -27,7 +27,7 @@ def get_orchestrator_params():
     return params
 
 
-def train_dqn():
+def train():
     env = gym.make('rla2048/Game2048-v0', render_mode='rgb_array')
     agent_params = get_learner_params()
     agent = DQLAgent(agent_params)

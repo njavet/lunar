@@ -32,7 +32,7 @@ class DQLAgent(Learner):
         self.max_tiles = []
         self.total_rewards = []
 
-    def behave_policy(self, state: torch.Tensor) -> int:
+    def policy(self, state: torch.Tensor) -> int:
         if np.random.rand() <= self.epsilon:
             return int(np.random.choice(range(4)))
         with torch.no_grad():
