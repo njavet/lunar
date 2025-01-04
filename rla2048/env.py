@@ -50,7 +50,7 @@ class Env2048(gym.Env):
 
         return observation, info
 
-    def step(self, action: int) -> tuple[torch.Tensor, torch.Tensor, bool, bool, dict]:
+    def step(self, action: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, bool, bool, dict]:
         new_board, score = merge.execute_action(self.board, action)
         self.score += score
 

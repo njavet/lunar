@@ -1,7 +1,5 @@
 from abc import ABC
-from typing import Union
 import torch
-import numpy as np
 
 # project imports
 from rla2048.schemas import LearnerParams, Trajectory
@@ -16,7 +14,7 @@ class Learner(ABC):
     def reset_trajectory(self) -> None:
         self.trajectory = Trajectory()
 
-    def policy(self, state: Union[torch.Tensor, np.ndarray, int]) -> int:
+    def policy(self, state: torch.Tensor) -> torch.Tensor:
         raise NotImplementedError
 
     def process_step(self) -> None:

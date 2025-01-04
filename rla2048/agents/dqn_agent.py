@@ -34,13 +34,13 @@ class DQLAgent(Learner):
         self.max_tiles = []
         self.total_rewards = []
 
-    def policy(self, state: torch.Tensor) -> int:
+    def policy(self, state: torch.Tensor) -> torch.Tensor:
         if np.random.rand() <= self.epsilon:
-            return int(np.random.choice(range(4)))
+            return torch.randint(0, 4, (1,))
         with torch.no_grad():
             q_values = self.model(state)
         max_actions = (q_values == q_values.max()).nonzero(as_tuple=True)[0]
-        return int(max_actions[torch.randint(0, len(max_actions), (1,))].item())
+        return max_actions[torch.randint(0, len(max_actions), (1,))]
 
     def remember(self):
         ts = self.trajectory.steps[-1]

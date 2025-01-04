@@ -5,10 +5,10 @@ import numpy as np
 
 
 class Actions(Enum):
-    left = 0
-    down = 1
-    right = 2
-    up = 3
+    left = torch.tensor(0, dtype=torch.uint8)
+    down = torch.tensor(1, dtype=torch.uint8)
+    right = torch.tensor(2, dtype=torch.uint8)
+    up = torch.tensor(3, dtype=torch.uint8)
 
 
 def merge_left(board: torch.Tensor) -> tuple[torch.Tensor, float]:
@@ -61,7 +61,8 @@ def merge_up(board: torch.Tensor) -> tuple[torch.Tensor, float]:
     return new_board, score
 
 
-def execute_action(board: torch.Tensor, action: int) -> tuple[torch.Tensor, float]:
+def execute_action(board: torch.Tensor, action: torch.Tensor) -> tuple[torch.Tensor, float]:
+    action = int(action.item())
     if action == 0:
         new_board, score = merge_left(board)
     elif action == 1:

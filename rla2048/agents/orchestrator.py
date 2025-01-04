@@ -1,4 +1,5 @@
 import gymnasium as gym
+import torch
 
 # project imports
 from rla2048.schemas import OrchestratorParams, TrajectoryStep
@@ -14,7 +15,7 @@ class Orchestrator:
         self.agent = agent
         self.params = params
 
-    def run_episode(self, episode):
+    def run_episode(self, episode: int) -> None:
         self.agent.reset_trajectory()
         state, info = self.env.reset()
         terminated = False
@@ -26,12 +27,12 @@ class Orchestrator:
                                 action=action,
                                 reward=reward,
                                 next_state=next_state,
-                                done=terminated)
+                                done=torch.tensor(terminated))
             self.agent.trajectory.steps.append(ts)
             self.agent.process_step()
             state = next_state
         self.agent.process_episode(episode)
 
-    def train_agent(self):
+    def train_agent(self) -> None:
         for n in range(self.params.n_episodes):
             self.run_episode(n)

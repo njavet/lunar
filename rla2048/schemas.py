@@ -21,10 +21,10 @@ class LearnerParams(BaseModel):
 
 class TrajectoryStep(BaseModel):
     state: torch.Tensor
-    action: int
+    action: torch.Tensor
     reward: torch.Tensor
     next_state: torch.Tensor
-    done: bool
+    done: torch.Tensor
 
     class Config:
         arbitrary_types_allowed = True
