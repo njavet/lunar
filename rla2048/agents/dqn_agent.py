@@ -29,6 +29,9 @@ class DQLAgent(Learner):
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
         self.criterion = nn.MSELoss()
         self.trajectories = defaultdict(list)
+        self.max_tiles = []
+        self.total_rewards = []
+
         # collection infos
 
     def policy(self, state: torch.Tensor) -> torch.Tensor:
@@ -82,9 +85,28 @@ class DQLAgent(Learner):
             self.update_target_model()
 
     def process_episode(self, episode):
-        self.decay_epsilon()
+        st = self.trajectory.steps[-1].next_state.reshape((4, 4, 16))
+        inds = (st == 1).nonzero(as_tuple=False)
+        st = torch.pow(2, inds[:, 2]).to(torch.int32)
+        tr = sum([ts.reward for ts in self.trajectory.steps])
+        self.max_tiles.append((st.max().item(), tr))
+        self.total_rewards.append(tr)
         if episode % 50 == 0:
             print(f'episode {episode} with epsilon: {self.epsilon}')
-            #so = sorted(self.max_tiles, reverse=True)[0]
-            #print(f'Highest tile: {int(so[0])}, highest reward: {so[1]}')
+            so = sorted(self.max_tiles, reverse=True)[0]
+            print(f'Highest tile: {int(so[0])}, highest reward: {so[1]}')
             print(64*'-')
+        if episode % 1000 == 0:
+            self.save_checkpoint(episode)
+        self.decay_epsilon()
+
+    def save_checkpoint(self, episode, filename='checkpoint.pth'):
+        torch.save({
+            'model_state_dict': self.model.state_dict(),
+            'target_model_state_dict': self.target_model.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+            'memory': self.memory,
+            'episode': episode,
+            'epsilon': self.epsilon
+        }, filename)
+

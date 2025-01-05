@@ -25,3 +25,4 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 train = "rla2048.main:train"
 play = "rla2048.main:play"
+eval = "rla2048.main:evaluate_policy"
