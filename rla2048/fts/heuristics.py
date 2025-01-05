@@ -3,11 +3,11 @@ import torch
 
 
 def max_tile_heuristic(board: torch.Tensor) -> float:
-    return -1 / torch.max(board)
+    return torch.max(board).item()
 
 
 def zero_tile_heuristic(board: torch.Tensor) -> float:
-    tmp = torch.count_nonzero(board) / 16
+    tmp = torch.count_nonzero(board)
     return tmp.item()
 
 
@@ -60,10 +60,7 @@ def corner_heuristic(board: torch.Tensor) -> float:
                             [0, 0, 0, 0],
                             [1, 0, 0, 1]], device='cuda')
     cs = torch.sum(board * weights)
-    if cs > 0:
-        return -1 / cs
-    else:
-        return -1
+    return cs.item()
 
 
 def utility(grid: torch.Tensor, weights: torch.Tensor = None) -> float:

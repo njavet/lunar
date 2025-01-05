@@ -6,7 +6,7 @@ import pygame
 from gymnasium.core import RenderFrame
 
 # project imports
-from rla2048.fts import merge
+from rla2048.fts import merge, heuristics
 from rla2048 import config
 
 
@@ -55,8 +55,12 @@ class Env2048(gym.Env):
         self.score += score
 
         if not torch.equal(self.board, new_board):
+
+            cs = heuristics.corner_heuristic(self.board)
+            mt = heuristics.max_tile_heuristic(self.board)
+            zh = heuristics.zero_tile_heuristic(self.board)
             self.board = merge.add_random_tile(new_board)
-            reward = score + 1
+            reward = score + 1 + cs + mt + zh
         else:
             reward = -1
 
