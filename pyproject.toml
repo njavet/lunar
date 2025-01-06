@@ -24,6 +24,6 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-train = "rla2048.main:train"
+train = "rla2048.main:main"
 play = "rla2048.main:play"
 eval = "rla2048.main:evaluate_policy"

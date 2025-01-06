@@ -23,18 +23,17 @@ def main():
                      memory_size=params.memory_size,
                      update_target_steps=params.update_target_steps,
                      lr=params.lr)
-    env = make_vec_env('Game2048-v0', n_envs=16)
+    # env = make_vec_env('Game2048-v0', n_envs=16)
+    env = gym.make('Game2048-v0')
     train_agent(agent, env)
 
 
 def train_agent(agent, env):
-    episode_rewards = np.zeros(env.num_envs)
     max_time_steps = 100000
-    states = env.reset()
+    states, _ = env.reset()
     for step in range(max_time_steps):
         actions = agent.select_actions(states)
-        next_states, rewards, dones, infos = env.step(actions)
-        episode_rewards += rewards
+        next_states, rewards, dones, _, infos = env.step(actions)
         agent.store_transitions(states, actions, rewards, next_states, dones)
         agent.learn()
         states = next_states

@@ -10,10 +10,13 @@ from rla2048 import config
 
 
 class Env2048(gym.Env):
+    metadata = {'render_modes': ['human', 'rgb_array', 'rgb_array_list', 'ansi'],
+                'render_fps': 4}
+
     def __init__(self, render_mode=None):
-        super().__init__(observation_space=MultiBinary(256),
-                         action_space=Discrete(4),
-                         render_mode=render_mode)
+        self.render_mode = render_mode
+        self.observation_space = MultiBinary(256)
+        self.action_space = Discrete(4)
         self.board = np.zeros((4, 4), dtype=np.int64)
         self.score = 0
         self.window_size = 512
@@ -22,7 +25,7 @@ class Env2048(gym.Env):
 
     def get_obs(self):
         obs = np.zeros((4, 4, 16), dtype=np.uint8)
-        rs, cs = np.argwhere(self.board != 0)
+        rs, cs = np.where(self.board != 0)
         one_hot = np.log2(self.board[rs, cs]).astype(np.uint8)
         obs[rs, cs, one_hot] = 1
         return obs.flatten()
