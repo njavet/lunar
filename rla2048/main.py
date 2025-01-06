@@ -3,9 +3,7 @@ import torch
 import cv2
 
 # project imports
-from rla2048.agents.dqn_agent import DQLAgent
-from rla2048.agents.orchestrator import Orchestrator
-from rla2048.schemas import OrchestratorParams, LearnerParams
+from rla2048.agent import DQNAgent
 
 
 

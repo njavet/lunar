@@ -11,7 +11,7 @@ from rla2048.schemas import LearnerParams
 from rla2048.dqn import DQN3
 
 
-class DQLAgent(Learner):
+class DQNAgent:
     def __init__(self, params: LearnerParams):
         super().__init__(params)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
