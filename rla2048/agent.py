@@ -44,7 +44,7 @@ class DQNAgent:
         actions = q_values.argmax(dim=1).detach().cpu().numpy()
         return actions
 
-    def train(self):
+    def learn(self):
         self.steps += 1
         if len(self.memory) < self.batch_size:
             return
@@ -95,7 +95,6 @@ class ReplayMemory:
                              dtype=torch.float32,
                              device=self.device)
         return states, actions, rewards, next_states, dones
-
 
     def __len__(self):
         return len(self.memory)
