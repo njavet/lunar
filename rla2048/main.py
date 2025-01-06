@@ -8,24 +8,6 @@ from rla2048.agents.orchestrator import Orchestrator
 from rla2048.schemas import OrchestratorParams, LearnerParams
 
 
-def get_learner_params():
-    params = LearnerParams(alpha=0.01,
-                           gamma=0.99,
-                           epsilon=1.0,
-                           epsilon_min=0.05,
-                           decay=0.998,
-                           batch_size=512,
-                           memory_size=5000000,
-                           update_target_steps=101)
-    return params
-
-
-def get_orchestrator_params():
-    params = OrchestratorParams(n_runs=0,
-                                n_episodes=2**11,
-                                seed=0x101)
-    return params
-
 
 def train():
     env = gym.make('rla2048/Game2048-v0', render_mode='rgb_array')
