@@ -1,53 +1,106 @@
-import numpy as np
+from collections import deque
 import random
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from collections import deque, defaultdict
-
-# project imports
-from rla2048.agents.learner import Learner
-from rla2048.schemas import LearnerParams
-from rla2048.dqn import DQN3
 
 
 class DQNAgent:
-    def __init__(self, params: LearnerParams):
-        super().__init__(params)
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.gamma = params.gamma
-        self.epsilon = params.epsilon
-        self.epsilon_decay = params.decay
-        self.epsilon_min = params.epsilon_min
-        self.batch_size = params.batch_size
-        self.update_target_steps = params.update_target_steps
-        self.memory = deque(maxlen=params.memory_size)
-        # dqn
-        self.model = DQN3(256, 4).to(self.device)
-        self.target_model = DQN3(256, 4).to(self.device)
-        self.target_model.load_state_dict(self.model.state_dict())
-        self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
-        self.criterion = nn.MSELoss()
-        self.trajectories = defaultdict(list)
-        self.max_tiles = []
-        self.total_rewards = []
+    def __init__(self,
+                 obs_dim: int,
+                 action_dim: int,
+                 dqn: nn.Module,
+                 gamma: float,
+                 epsilon: float,
+                 epsilon_min: float,
+                 decay: float,
+                 batch_size: int,
+                 memory_size: int,
+                 update_target_steps: int,
+                 lr: float) -> None:
+        self.dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.obs_dim = obs_dim
+        self.action_dim = action_dim
+        self.policy_net = dqn(self.obs_dim, self.action_dim).to(self.dev)
+        self.target_net = dqn(self.obs_dim, self.action_dim).to(self.dev)
+        self.target_net.load_state_dict(self.policy_net.state_dict())
+        self.memory = ReplayMemory(self.dev, memory_size=memory_size)
+        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=lr)
+        self.batch_size = batch_size
+        self.update_target_steps = update_target_steps
+        self.gamma = gamma
+        self.epsilon = epsilon
+        self.epsilon_min = epsilon_min
+        self.decay = decay
+        self.steps = 0
 
-        # collection infos
-
-    def policy(self, state: torch.Tensor) -> torch.Tensor:
-        if np.random.rand() <= self.epsilon:
-            return torch.randint(0, 4, (1,), device=self.device)
+    def select_actions(self, states):
+        if random.random() < self.epsilon:
+            return np.random.randint(self.action_dim, size=len(states))
+        states = torch.tensor(states, dtype=torch.float32, device=self.dev)
         with torch.no_grad():
-            q_values = self.model(state)
-        max_actions = (q_values == q_values.max()).nonzero(as_tuple=True)[0]
-        return max_actions[torch.randint(0, len(max_actions), (1,), device='cuda')]
+            q_values = self.policy_net(states)
+        actions = q_values.argmax(dim=1).detach().cpu().numpy()
+        return actions
 
-    def remember(self):
-        ts = self.trajectory.steps[-1]
-        self.memory.append(
-            (ts.state, ts.action, ts.reward, ts.next_state, ts.done)
-        )
+    def train(self):
+        self.steps += 1
+        if len(self.memory) < self.batch_size:
+            return
+        states, actions, rewards, next_states, dones = self.memory.sample(self.batch_size)
+        q_values = self.policy_net(states).gather(1, actions).squeeze()
+        with torch.no_grad():
+            next_q_values = self.target_net(next_states).max(1)[0]
+        expected_q_values = rewards + (self.gamma * next_q_values * (1 - dones))
+        loss = torch.nn.functional.mse_loss(q_values, expected_q_values)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        self.epsilon = max(self.epsilon * self.decay, self.epsilon_min)
 
+    def store_transitions(self, states, actions, rewards, next_states, dones):
+        self.memory.push(states, actions, rewards, next_states, dones)
+
+    def update_target_net(self):
+        self.target_net.load_state_dict(self.policy_net.state_dict())
+
+
+class ReplayMemory:
+    def __init__(self, device: torch.device, memory_size: int):
+        self.device = device
+        self.memory = deque(maxlen=memory_size)
+
+    def push(self, states, actions, rewards, next_states, dones):
+        transitions = zip(states, actions, rewards, next_states, dones)
+        for transition in transitions:
+            self.memory.append(transition)
+
+    def sample(self, batch_size):
+        batch = random.sample(self.memory, batch_size)
+        states, actions, rewards, next_states, dones = zip(*batch)
+        states = torch.tensor(np.array(states),
+                              dtype=torch.float32,
+                              device=self.device)
+        actions = torch.tensor(np.array(actions),
+                               dtype=torch.long,
+                               device=self.device).unsqueeze(1)
+        rewards = torch.tensor(np.array(rewards),
+                               dtype=torch.float32,
+                               device=self.device)
+        next_states = torch.tensor(np.array(next_states),
+                                   dtype=torch.float32,
+                                   device=self.device)
+        dones = torch.tensor(np.array(dones),
+                             dtype=torch.float32,
+                             device=self.device)
+        return states, actions, rewards, next_states, dones
+
+
+    def __len__(self):
+        return len(self.memory)
+
+"""
     def replay(self):
         if len(self.memory) < self.batch_size:
             return
@@ -71,35 +124,6 @@ class DQNAgent:
         loss.backward()
         self.optimizer.step()
 
-    def update_target_model(self):
-        self.target_model.load_state_dict(self.model.state_dict())
-
-    def decay_epsilon(self):
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
-
-    def process_step(self):
-        self.remember()
-        self.replay()
-        if len(self.trajectory.steps) % self.update_target_steps == 0:
-            self.update_target_model()
-
-    def process_episode(self, episode):
-        st = self.trajectory.steps[-1].next_state.reshape((4, 4, 16))
-        inds = (st == 1).nonzero(as_tuple=False)
-        st = torch.pow(2, inds[:, 2]).to(torch.int32)
-        tr = sum([ts.reward for ts in self.trajectory.steps])
-        self.max_tiles.append((st.max().item(), tr))
-        self.total_rewards.append(tr)
-        if episode % 50 == 0:
-            print(f'episode {episode} with epsilon: {self.epsilon}')
-            so = sorted(self.max_tiles, reverse=True)[0]
-            print(f'Highest tile: {int(so[0])}, highest reward: {so[1]}')
-            print(64*'-')
-        if episode % 1000 == 0:
-            self.save_checkpoint(episode)
-        self.decay_epsilon()
-
     def save_checkpoint(self, episode, filename='checkpoint.pth'):
         torch.save({
             'model_state_dict': self.model.state_dict(),
@@ -110,3 +134,4 @@ class DQNAgent:
             'epsilon': self.epsilon
         }, filename)
 
+"""

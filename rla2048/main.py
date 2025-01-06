@@ -4,6 +4,7 @@ import cv2
 
 # project imports
 from rla2048.agent import DQNAgent
+from rla2048.dqns import DQN
 
 def main():
 
