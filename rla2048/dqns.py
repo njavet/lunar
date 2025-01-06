@@ -15,3 +15,24 @@ class DQN(nn.Module):
         x = nn.functional.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+
+
+class ConNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(16, 64, kernel_size=2),
+            nn.ReLU(),
+            nn.Conv2d(64, 128, kernel_size=2),
+            nn.ReLU()
+        )
+        self.fc = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(128 * 2 * 2, 256),
+            nn.ReLU(),
+            nn.Linear(256, 4)
+        )
+
+    def forward(self, x):
+        x = self.conv(x)
+        return self.fc(x)
