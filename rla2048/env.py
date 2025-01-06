@@ -44,22 +44,17 @@ class Env2048(gym.Env):
 
         return observation, info
 
-    def step(self, action: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, bool, bool, dict]:
+    def step(self, action):
         new_board, score = merge.execute_action(self.board, action)
         self.score += score
 
-        if not torch.equal(self.board, new_board):
-
-            cs = heuristics.corner_heuristic(self.board)
-            mt = heuristics.max_tile_heuristic(self.board)
-            zh = heuristics.zero_tile_heuristic(self.board)
+        if not np.array_equal(self.board, new_board):
             self.board = merge.add_random_tile(new_board)
-            reward = score + 1 + cs + mt + zh
+            reward = score + 1
         else:
             reward = -1
 
         observation = self.get_obs()
-        reward = torch.tensor(reward, device=self.device)
         game_over = merge.game_over(self.board)
         info = self.get_info()
 
