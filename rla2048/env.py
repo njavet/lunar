@@ -1,9 +1,8 @@
-import torch
-import numpy as np
 import gymnasium as gym
-from gymnasium import spaces
-import pygame
 from gymnasium.core import RenderFrame
+from gymnasium.spaces import MultiBinary, Discrete
+import numpy as np
+import pygame
 
 # project imports
 from rla2048.fts import merge, heuristics
@@ -11,25 +10,20 @@ from rla2048 import config
 
 
 class Env2048(gym.Env):
-    metadata = {'render_modes': ['human', 'rgb_array', 'rgb_array_list', 'ansi'],
-                'render_fps': 4}
-
     def __init__(self, render_mode=None):
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.action_space = spaces.Discrete(4)
-        # 4x4 grid with 16bit onehot encoding
-        self.board = torch.zeros((4, 4), device=self.device)
+        super().__init__(observation_space=MultiBinary(256),
+                         action_space=Discrete(4),
+                         render_mode=render_mode)
+        self.board = np.zeros((4, 4), dtype=np.int64)
         self.score = 0
-        self.observation_space = spaces.MultiBinary(256)
         self.window_size = 512
-        self.render_mode = render_mode
         self.window = None
         self.clock = None
 
     def get_obs(self):
-        obs = torch.zeros((4, 4, 16), device=self.device)
-        rs, cs = (self.board != 0).nonzero(as_tuple=True)
-        one_hot = self.board[rs, cs].log2().to(torch.long)
+        obs = np.zeros((4, 4, 16), dtype=np.uint8)
+        rs, cs = np.argwhere(self.board != 0)
+        one_hot = np.log2(self.board[rs, cs]).astype(np.uint8)
         obs[rs, cs, one_hot] = 1
         return obs.flatten()
 
@@ -38,7 +32,7 @@ class Env2048(gym.Env):
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self.board = torch.zeros((4, 4), device=self.device)
+        self.board = np.zeros((4, 4), dtype=np.int64)
         self.score = 0
         self.board = merge.add_random_tile(self.board)
         self.board = merge.add_random_tile(self.board)

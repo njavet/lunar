@@ -1,17 +1,16 @@
-import torch
 from enum import Enum
 import random
 import numpy as np
 
 
 class Actions(Enum):
-    left = torch.tensor(0, dtype=torch.uint8, device='cuda')
-    down = torch.tensor(1, dtype=torch.uint8, device='cuda')
-    right = torch.tensor(2, dtype=torch.uint8, device='cuda')
-    up = torch.tensor(3, dtype=torch.uint8, device='cuda')
+    left = 0
+    down = 1
+    right = 2
+    up = 3
 
 
-def merge_left(board: torch.Tensor) -> tuple[torch.Tensor, float]:
+def merge_left(board: np.ndarray) -> tuple[np.ndarray, float]:
 
     def _merge_row(row: list, acc: list, s: float = 0) -> tuple[list[int], float]:
         if not row:
@@ -37,31 +36,31 @@ def merge_left(board: torch.Tensor) -> tuple[torch.Tensor, float]:
         padded_row = np.pad(merged_row, (0, 4 - len(merged_row)))
         new_board.append(padded_row)
         score += s_
-    return torch.tensor(np.array(new_board), device='cuda'), score
+    return np.array(new_board), score
 
 
-def merge_right(board: torch.Tensor) -> tuple[torch.Tensor, float]:
-    flipped = torch.fliplr(board)
+def merge_right(board: np.ndarray) -> tuple[np.ndarray, float]:
+    flipped = np.fliplr(board)
     left_flipped, score = merge_left(flipped)
-    new_board = torch.fliplr(left_flipped)
+    new_board = np.fliplr(left_flipped)
     return new_board, score
 
 
-def merge_down(board: torch.Tensor) -> tuple[torch.Tensor, float]:
-    rotated = torch.rot90(board, -1)
+def merge_down(board: np.ndarray) -> tuple[np.ndarray, float]:
+    rotated = np.rot90(board, -1)
     left_rotated, score = merge_left(rotated)
-    new_board = torch.rot90(left_rotated)
+    new_board = np.rot90(left_rotated)
     return new_board, score
 
 
-def merge_up(board: torch.Tensor) -> tuple[torch.Tensor, float]:
-    rotated = torch.rot90(board)
+def merge_up(board: np.ndarray) -> tuple[np.ndarray, float]:
+    rotated = np.rot90(board)
     left_rotated, score = merge_left(rotated)
-    new_board = torch.rot90(left_rotated, -1)
+    new_board = np.rot90(left_rotated, -1)
     return new_board, score
 
 
-def execute_action(board: torch.Tensor, action: torch.Tensor) -> tuple[torch.Tensor, float]:
+def execute_action(board: np.ndarray, action: int) -> tuple[np.ndarray, float]:
     if action == 0:
         new_board, score = merge_left(board)
     elif action == 1:
@@ -75,18 +74,18 @@ def execute_action(board: torch.Tensor, action: torch.Tensor) -> tuple[torch.Ten
     return new_board, score
 
 
-def game_over(board: torch.Tensor) -> bool:
-    if torch.any(board == 0):
+def game_over(board: np.ndarray) -> bool:
+    if np.any(board == 0):
         return False
     for action in Actions:
         new_board, _ = execute_action(board, action.value)
-        if not torch.equal(board, new_board):
+        if not np.equal(board, new_board):
             return False
     return True
 
 
-def add_random_tile(board: torch.Tensor) -> torch.Tensor:
-    r, c = random.choice((board == 0).nonzero(as_tuple=False).tolist())
-    new_board = board.clone()
+def add_random_tile(board: np.ndarray) -> np.ndarray:
+    r, c = np.argwhere(board == 0)
+    new_board = board.copy()
     new_board[r, c] = 2 if random.random() < 0.9 else 4
     return new_board
