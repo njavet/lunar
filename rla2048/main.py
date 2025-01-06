@@ -5,6 +5,8 @@ import cv2
 # project imports
 from rla2048.agent import DQNAgent
 
+def main():
+
 
 
 def train():
