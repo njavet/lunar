@@ -10,6 +10,26 @@ class Actions(Enum):
     up = 3
 
 
+def state_to_board(state: np.ndarray) -> np.ndarray:
+    board = np.zeros((4, 4), dtype=np.uint16)
+    one_hots, rs, cs = np.where(state != 0)
+    values = np.exp2(one_hots + 1).astype(np.uint16)
+    board[rs, cs] = values
+    return board
+
+
+def board_to_state(board: np.ndarray) -> np.ndarray:
+    state = np.zeros((17, 4, 4), dtype=np.uint8)
+    rs, cs = np.where(board != 0)
+    one_hot = np.log2(board[rs, cs]).astype(np.uint8)
+    state[one_hot, rs, cs] = 1
+    return state[1:]
+
+
+def shift_left(state: np.ndarray) -> np.ndarray:
+    pass
+
+
 def merge_left(board: np.ndarray) -> tuple[np.ndarray, float]:
 
     def _merge_row(row: list, acc: list, s: float = 0) -> tuple[list[int], float]:
