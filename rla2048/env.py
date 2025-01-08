@@ -5,7 +5,7 @@ import numpy as np
 import pygame
 
 # project imports
-from rla2048.fts import merge
+from rla2048.core import state
 from rla2048 import config
 
 
