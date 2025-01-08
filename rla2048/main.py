@@ -7,14 +7,14 @@ import cv2
 # project imports
 from rla2048.config import Params
 from rla2048.agent import DQNAgent
-from rla2048.dqns import DQN
+from rla2048.dqns import DQN, ConNet
 
 
 def main():
     params = Params()
     agent = DQNAgent(obs_dim=params.obs_dim,
                      action_dim=params.action_dim,
-                     dqn=DQN,
+                     dqn=ConNet,
                      gamma=params.gamma,
                      epsilon=params.epsilon,
                      epsilon_min=params.epsilon_min,
@@ -31,6 +31,7 @@ def main():
 def train_agent(agent, env):
     max_time_steps = 100000
     states, _ = env.reset()
+    episode_rewards = np.zeros(16)
     for step in range(max_time_steps):
         actions = agent.select_actions(states)
         next_states, rewards, dones, _, infos = env.step(actions)
@@ -56,7 +57,15 @@ def load_checkpoint(agent, filename='checkpoint.pth'):
     agent.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     agent.memory = checkpoint['memory']
     agent.epsilon = checkpoint['epsilon']
-    return checkpoint['episode']
+
+
+def save_checkpoint(agent, filename='checkpoint.pth'):
+    dix = {'policy_state_dict': agent.policy_net.state_dict(),
+           'target_state_dict': agent.target_net.state_dict(),
+           'optimizer_state_dict': agent.optimizer.state_dict(),
+           'memory': agent.memory.memory,
+           'epsilon': agent.epsilon}
+    torch.save(dix, filename)
 
 
 def evaluate_policy(fname='dql_2048_cuda_2e10_heu.pth'):
@@ -68,7 +77,6 @@ def evaluate_policy(fname='dql_2048_cuda_2e10_heu.pth'):
     orch_params = get_orchestrator_params()
     orchestrator = Orchestrator(env, agent, orch_params)
     orchestrator.run_episode(0)
-
 
 
 def record_video():

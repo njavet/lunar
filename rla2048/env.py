@@ -17,19 +17,14 @@ class Env2048(gym.Env):
         self.render_mode = render_mode
         self.observation_space = Box(low=0, high=1, shape=(16, 4, 4))
         self.action_space = Discrete(4)
-        self.state = np.zeros((16, 4, 4), dtype=np.uint8)
+        self.board = np.zeros((4, 4), dtype=np.uint16)
         self.score = 0
         self.window_size = 512
         self.window = None
         self.clock = None
 
     def get_obs(self):
-        return self.state
-        obs = np.zeros((16, 4, 4), dtype=np.uint8)
-        rs, cs = np.where(self.board != 0)
-        one_hot = np.log2(self.board[rs, cs]).astype(np.uint8)
-        obs[one_hot, rs, cs] = 1
-        return obs
+        return state.board_to_state(self.board)
 
     def get_info(self):
         return {'score': self.score}
@@ -38,8 +33,8 @@ class Env2048(gym.Env):
         super().reset(seed=seed)
         self.board = np.zeros((4, 4), dtype=np.int64)
         self.score = 0
-        self.board = merge.add_random_tile(self.board)
-        self.board = merge.add_random_tile(self.board)
+        self.board = state.add_random_tile(self.board)
+        self.board = state.add_random_tile(self.board)
         observation = self.get_obs()
         info = self.get_info()
 
@@ -49,17 +44,18 @@ class Env2048(gym.Env):
         return observation, info
 
     def step(self, action):
-        new_board, score = merge.execute_action(self.board, action)
+        new_board = state.execute_action(self.board, action)
+        score = state.get_score(self.board, new_board)
         self.score += score
 
         if not np.array_equal(self.board, new_board):
-            self.board = merge.add_random_tile(new_board)
+            self.board = state.add_random_tile(new_board)
             reward = score + 1
         else:
             reward = -1
 
         observation = self.get_obs()
-        game_over = merge.game_over(self.board)
+        game_over = state.game_over(self.board)
         info = self.get_info()
 
         if self.render_mode == 'human':
