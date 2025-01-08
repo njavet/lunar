@@ -65,6 +65,18 @@ def merge_up(board: np.ndarray) -> np.ndarray:
     return new_board
 
 
+def score(board: np.ndarray, merged: np.ndarray) -> int:
+    b0_tiles = dict(zip(*np.unique(board, return_counts=True)))
+    b1_tiles = dict(zip(*np.unique(merged, return_counts=True)))
+    s = 0
+    for tile, count in b1_tiles.items():
+        if tile not in b0_tiles:
+            s += tile
+        else:
+            s += tile * abs(count - b0_tiles[tile])
+    return s
+
+
 def execute_action(board: np.ndarray, action: int) -> np.ndarray:
     if action == 0:
         new_board = merge_left(board)
