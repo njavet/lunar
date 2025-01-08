@@ -1,5 +1,6 @@
 import gymnasium as gym
 import numpy as np
+from gymnasium.vector import SyncVectorEnv
 from stable_baselines3.common.env_util import make_vec_env
 import torch
 import cv2
@@ -7,14 +8,13 @@ import cv2
 # project imports
 from rla2048.config import Params
 from rla2048.agent import DQNAgent
+from rla2048.env import Env2048
 from rla2048.dqns import DQN, ConNet
 
 
 def main():
     params = Params()
-    agent = DQNAgent(obs_dim=params.obs_dim,
-                     action_dim=params.action_dim,
-                     dqn=ConNet,
+    agent = DQNAgent(dqn=ConNet,
                      gamma=params.gamma,
                      epsilon=params.epsilon,
                      epsilon_min=params.epsilon_min,
@@ -24,17 +24,18 @@ def main():
                      update_target_steps=params.update_target_steps,
                      lr=params.lr)
     # env = make_vec_env('Game2048-v0', n_envs=16)
-    env = gym.make('Game2048-v0')
+    env = make_vec_env(lambda: Env2048(), n_envs=16)
+    # env = gym.make('Game2048-v0')
     train_agent(agent, env)
 
 
 def train_agent(agent, env):
     max_time_steps = 100000
-    states, _ = env.reset()
+    states = env.reset()
     episode_rewards = np.zeros(16)
     for step in range(max_time_steps):
         actions = agent.select_actions(states)
-        next_states, rewards, dones, _, infos = env.step(actions)
+        next_states, rewards, dones, infos = env.step(actions)
         agent.store_transitions(states, actions, rewards, next_states, dones)
         agent.learn()
         states = next_states
@@ -68,15 +69,9 @@ def save_checkpoint(agent, filename='checkpoint.pth'):
     torch.save(dix, filename)
 
 
-def evaluate_policy(fname='dql_2048_cuda_2e10_heu.pth'):
+def evaluate_policy(fname='g2048.pth'):
     p = torch.load(fname)
-    agent_params = get_learner_params()
-    agent = DQLAgent(agent_params)
     env = gym.make('rla2048/Game2048-v0', render_mode='human')
-    agent.model.load_state_dict(p)
-    orch_params = get_orchestrator_params()
-    orchestrator = Orchestrator(env, agent, orch_params)
-    orchestrator.run_episode(0)
 
 
 def record_video():

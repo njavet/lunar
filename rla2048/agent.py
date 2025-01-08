@@ -8,8 +8,6 @@ import torch.optim as optim
 
 class DQNAgent:
     def __init__(self,
-                 obs_dim: int,
-                 action_dim: int,
                  dqn: nn.Module,
                  gamma: float,
                  epsilon: float,
@@ -20,10 +18,8 @@ class DQNAgent:
                  update_target_steps: int,
                  lr: float) -> None:
         self.dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.obs_dim = obs_dim
-        self.action_dim = action_dim
-        self.policy_net = dqn(self.obs_dim, self.action_dim).to(self.dev)
-        self.target_net = dqn(self.obs_dim, self.action_dim).to(self.dev)
+        self.policy_net = dqn().to(self.dev)
+        self.target_net = dqn().to(self.dev)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.memory = ReplayMemory(self.dev, memory_size=memory_size)
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=lr)
@@ -37,7 +33,7 @@ class DQNAgent:
 
     def select_actions(self, states):
         if random.random() < self.epsilon:
-            return np.random.randint(self.action_dim, size=len(states))
+            return np.random.randint(4, size=len(states))
         states = torch.tensor(states, dtype=torch.float32, device=self.dev)
         with torch.no_grad():
             q_values = self.policy_net(states)

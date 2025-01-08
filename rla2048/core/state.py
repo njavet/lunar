@@ -96,7 +96,7 @@ def game_over(board: np.ndarray) -> bool:
         return False
     for action in Actions:
         new_board = execute_action(board, action.value)
-        if not np.equal(board, new_board):
+        if not np.array_equal(board, new_board):
             return False
     return True
 
