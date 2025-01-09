@@ -124,7 +124,7 @@ class Env2048(gym.Env):
                 width=3,
             )
 
-        if self.render_mode == 'human':
+        if self.render_mode == 'uhuman':
             # The following line copies our drawings from `canvas`
             # to the visible window
             self.window.blit(canvas, canvas.get_rect())

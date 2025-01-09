@@ -36,6 +36,7 @@ def train_agent(agent, env):
     for step in range(max_time_steps):
         actions = agent.select_actions(states)
         next_states, rewards, dones, infos = env.step(actions)
+        episode_rewards += rewards
         agent.store_transitions(states, actions, rewards, next_states, dones)
         agent.learn()
         states = next_states
@@ -71,7 +72,15 @@ def save_checkpoint(agent, filename='checkpoint.pth'):
 
 def evaluate_policy(fname='g2048.pth'):
     p = torch.load(fname)
-    env = gym.make('rla2048/Game2048-v0', render_mode='human')
+    model = p['target_state_dict']
+    env = gym.make('Game2048-v0', render_mode='human')
+    done = False
+    state, _ = env.reset()
+    while not done:
+        action = model(state).argmax()
+        ns, r, term, trunc, info = env.step(action)
+        done = term or trunc
+        state = ns
 
 
 def record_video():
