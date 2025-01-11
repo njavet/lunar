@@ -1,6 +1,5 @@
 import gymnasium as gym
 import numpy as np
-from gymnasium.vector import SyncVectorEnv
 from stable_baselines3.common.env_util import make_vec_env
 import torch
 import cv2
@@ -13,7 +12,7 @@ from lunar.dqns import DQN
 
 def main():
     params = Params()
-    agent = DQNAgent(dqn=ConNet,
+    agent = DQNAgent(dqn=DQN,
                      gamma=params.gamma,
                      epsilon=params.epsilon,
                      epsilon_min=params.epsilon_min,
@@ -22,13 +21,12 @@ def main():
                      memory_size=params.memory_size,
                      update_target_steps=params.update_target_steps,
                      lr=params.lr)
-    # env = make_vec_env('Game2048-v0', n_envs=16)
-    # env = gym.make('Game2048-v0')
+    env = make_vec_env('LunarLander-v3', n_envs=16)
     train_agent(agent, env)
 
 
 def train_agent(agent, env):
-    max_time_steps = 100000
+    max_time_steps = 1000000
     states = env.reset()
     episode_rewards = np.zeros(16)
     for step in range(max_time_steps):
@@ -47,7 +45,7 @@ def train_agent(agent, env):
             agent.update_target_net()
         if step % 100 == 0:
             print(f'step: {step}, rewards: {np.mean(episode_rewards)}')
-    torch.save(agent.target_net.state_dict(), 'g2048.pth')
+    torch.save(agent.target_net.state_dict(), 'lunar.pth')
 
 
 def load_checkpoint(agent, filename='checkpoint.pth'):
@@ -68,10 +66,10 @@ def save_checkpoint(agent, filename='checkpoint.pth'):
     torch.save(dix, filename)
 
 
-def evaluate_policy(fname='g2048.pth'):
+def evaluate_policy(fname='lunar.pth'):
     p = torch.load(fname)
     model = p['target_state_dict']
-    env = gym.make('Game2048-v0', render_mode='human')
+    env = gym.make('LunarLander-v3', render_mode='human')
     done = False
     state, _ = env.reset()
     while not done:
