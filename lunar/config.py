@@ -4,6 +4,7 @@ from pydantic import BaseModel
 class Params(BaseModel):
     obs_dim: int = 256
     action_dim: int = 4
+    n_envs: int = 32
     gamma: float = 0.99
     epsilon: float = 1.0
     epsilon_min: float = 0.01

@@ -21,14 +21,14 @@ def main():
                      memory_size=params.memory_size,
                      update_target_steps=params.update_target_steps,
                      lr=params.lr)
-    env = make_vec_env('LunarLander-v3', n_envs=16)
+    env = make_vec_env('LunarLander-v3', n_envs=params.n_envs)
     train_agent(agent, env)
 
 
 def train_agent(agent, env):
-    max_time_steps = 1000000
+    max_time_steps = 100000
     states = env.reset()
-    episode_rewards = np.zeros(16)
+    episode_rewards = np.zeros(32)
     for step in range(max_time_steps):
         actions = agent.select_actions(states)
         next_states, rewards, dones, infos = env.step(actions)
