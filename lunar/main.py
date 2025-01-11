@@ -7,16 +7,16 @@ import cv2
 # project imports
 from lunar.config import Params
 from lunar.agent import DQNAgent
-from lunar.dqns import DQN
+from lunar.dqns import LunarDQNSmall, LunarDQNMiddle, LunarDQNLarge
 
 
-def main():
+def train_small_agent():
     params = Params()
-    agent = DQNAgent(dqn=DQN,
-                     gamma=params.gamma,
-                     epsilon=params.epsilon,
-                     epsilon_min=params.epsilon_min,
-                     decay=params.decay,
+    lunar_agent = DQNAgent(dqn=DQN,
+                           gamma=params.gamma,
+                           epsilon=params.epsilon,
+                           epsilon_min=params.epsilon_min,
+                           decay=params.decay,
                      batch_size=params.batch_size,
                      memory_size=params.memory_size,
                      update_target_steps=params.update_target_steps,

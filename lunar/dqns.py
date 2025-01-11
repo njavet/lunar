@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 
-class LunarDQNSmall(nn.Module):
+class SmallLunarDQN(nn.Module):
     def __init__(self):
         super().__init__()
         self.net = nn.Sequential(
@@ -16,7 +16,7 @@ class LunarDQNSmall(nn.Module):
         return self.net(x)
 
 
-class LunarDQNMiddle(nn.Module):
+class MiddleLunarDQN(nn.Module):
     def __init__(self):
         super().__init__()
         self.net = nn.Sequential(
@@ -33,7 +33,7 @@ class LunarDQNMiddle(nn.Module):
         return self.net(x)
 
 
-class LunarDQNLarge(nn.Module):
+class LargeLunarDQN(nn.Module):
     def __init__(self):
         super().__init__()
         self.net = nn.Sequential(

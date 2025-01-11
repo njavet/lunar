@@ -13,3 +13,15 @@ class Params(BaseModel):
     memory_size: int = 5000000
     update_target_steps: int = 1024
     lr: float = 0.0005
+
+
+def get_small_lunar_params():
+    pass
+
+
+def get_middle_lunar_params():
+    pass
+
+
+def get_large_lunar_params():
+    pass
