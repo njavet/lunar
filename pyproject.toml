@@ -12,6 +12,8 @@ stable-baselines3 = "^2.4.1"
 pydantic = "^2.10.5"
 opencv-python = "^4.10.0.84"
 rich = "^13.9.4"
+pandas = "^2.2.3"
+ipython = "^8.31.0"
 
 
 [build-system]
