@@ -9,6 +9,8 @@ readme = "README.md"
 python = "^3.13"
 gymnasium = {extras = ["box2d"], version = "^1.0.0"}
 stable-baselines3 = "^2.4.1"
+pydantic = "^2.10.5"
+opencv-python = "^4.10.0.84"
 
 
 [build-system]

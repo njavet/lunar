@@ -94,39 +94,3 @@ class ReplayMemory:
 
     def __len__(self):
         return len(self.memory)
-
-"""
-    def replay(self):
-        if len(self.memory) < self.batch_size:
-            return
-        batch = random.sample(self.memory, self.batch_size)
-        states, actions, rewards, next_states, dones = map(
-            lambda x: torch.stack(x).to(self.device),
-            zip(*batch)
-        )
-
-        q_values = self.model(states)
-        with torch.no_grad():
-            next_q_values = self.target_model(next_states)
-            max_next_q_values = torch.max(next_q_values, dim=1)[0]
-
-        targets = q_values.clone()
-        for i in range(self.batch_size):
-            targets[i, actions[i]] = rewards[i] if dones[i] else rewards[i] + self.gamma * max_next_q_values[i]
-
-        self.optimizer.zero_grad()
-        loss = self.criterion(q_values, targets)
-        loss.backward()
-        self.optimizer.step()
-
-    def save_checkpoint(self, episode, filename='checkpoint.pth'):
-        torch.save({
-            'model_state_dict': self.model.state_dict(),
-            'target_model_state_dict': self.target_model.state_dict(),
-            'optimizer_state_dict': self.optimizer.state_dict(),
-            'memory': self.memory,
-            'episode': episode,
-            'epsilon': self.epsilon
-        }, filename)
-
-"""

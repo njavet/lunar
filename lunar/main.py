@@ -6,10 +6,9 @@ import torch
 import cv2
 
 # project imports
-from rla2048.config import Params
-from rla2048.agent import DQNAgent
-from rla2048.env import Env2048
-from rla2048.dqns import DQN, ConNet
+from lunar.config import Params
+from lunar.agent import DQNAgent
+from lunar.dqns import DQN
 
 
 def main():
@@ -24,7 +23,6 @@ def main():
                      update_target_steps=params.update_target_steps,
                      lr=params.lr)
     # env = make_vec_env('Game2048-v0', n_envs=16)
-    env = make_vec_env(lambda: Env2048(), n_envs=16)
     # env = gym.make('Game2048-v0')
     train_agent(agent, env)
 
