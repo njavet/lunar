@@ -36,15 +36,11 @@ def train_agent(agent, env):
         agent.store_transitions(states, actions, rewards, next_states, dones)
         agent.learn()
         states = next_states
-        if any(dones):
-            current_rewards = [episode_rewards[i] for i in
-                               range(len(episode_rewards)) if dones[i]]
-            print(f'total rewards: ', np.mean(current_rewards))
-            print(f'eps', agent.epsilon)
         if step % 1000 == 0:
             agent.update_target_net()
-        if step % 100 == 0:
+        if step % 1000 == 0:
             print(f'step: {step}, rewards: {np.mean(episode_rewards)}')
+            print(f'eps', agent.epsilon)
     torch.save(agent.target_net.state_dict(), 'lunar.pth')
 
 
