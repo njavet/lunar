@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "lunar"
+version = "0.1.0"
+description = ""
+authors = ["Noe Javet <np.javet@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+gymnasium = {extras = ["box2d"], version = "^1.0.0"}
+stable-baselines3 = "^2.4.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
