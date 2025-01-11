@@ -35,12 +35,12 @@ class DQNAgent(ABC):
 
     def select_actions(self, states):
         if random.random() < self.epsilon:
-            return np.random.randint(4, size=len(states))
+            return torch.randint(0, 4, (len(states),), device=self.dev).cpu().numpy()
         states = torch.tensor(states, dtype=torch.float32, device=self.dev)
         with torch.no_grad():
             q_values = self.policy_net(states)
-        actions = q_values.argmax(dim=1).detach().cpu().numpy()
-        return actions
+        actions = q_values.argmax(dim=1)
+        return actions.cpu().numpy()
 
     def learn(self):
         self.steps += 1
