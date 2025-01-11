@@ -1,14 +1,13 @@
+from abc import ABC
 from collections import deque
 import random
 import numpy as np
 import torch
-import torch.nn as nn
 import torch.optim as optim
 
 
-class DQNAgent:
+class DQNAgent(ABC):
     def __init__(self,
-                 dqn: nn.Module,
                  gamma: float,
                  epsilon: float,
                  epsilon_min: float,
@@ -18,18 +17,22 @@ class DQNAgent:
                  update_target_steps: int,
                  lr: float) -> None:
         self.dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.policy_net = dqn().to(self.dev)
-        self.target_net = dqn().to(self.dev)
-        self.target_net.load_state_dict(self.policy_net.state_dict())
         self.memory = ReplayMemory(self.dev, memory_size=memory_size)
-        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=lr)
+        self.init_dqn()
+        self.policy_net = None
+        self.target_net = None
+        self.optimizer = None
         self.batch_size = batch_size
         self.update_target_steps = update_target_steps
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
         self.decay = decay
+        self.lr = lr
         self.steps = 0
+
+    def init_dqn(self):
+        raise NotImplementedError
 
     def select_actions(self, states):
         if random.random() < self.epsilon:
