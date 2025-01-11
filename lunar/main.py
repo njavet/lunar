@@ -6,6 +6,7 @@ import cv2
 
 # project imports
 from lunar import config
+from lunar.utils.training import train_agent
 from lunar.agents.lunar_dql import (SmallLunarAgent,
                                     MiddleLunarAgent,
                                     LargeLunarAgent)
@@ -23,5 +24,3 @@ def train_small_agent():
                             lr=params.lr)
     env = make_vec_env('LunarLander-v3', n_envs=params.n_envs)
     train_agent(agent, env, params.max_time_steps, params.n)
-
-

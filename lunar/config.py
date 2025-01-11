@@ -17,15 +17,17 @@ class Params(BaseModel):
 
 
 def get_small_lunar_params():
-    params = Params()
+    params = Params(n_envs=256,
+                    decay=0.99999,
+                    max_time_steps=1e5)
     return params
 
 
 def get_middle_lunar_params():
-    params = Params()
+    params = Params(n_envs=256)
     return params
 
 
 def get_large_lunar_params():
-    params = Params()
+    params = Params(n_envs=256)
     return params

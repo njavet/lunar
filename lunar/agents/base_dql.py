@@ -16,7 +16,8 @@ class DQNAgent(ABC):
                  update_target_steps: int,
                  lr: float) -> None:
         self.dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.memory = ReplayMemory(self.dev, memory_size=memory_size)
+        #self.memory = ReplayMemory(self.dev, memory_size=memory_size)
+        self.memory = ReplayMemoryGPU(self.dev, memory_size=memory_size, state_shape=(8,))
         self.init_dqn()
         self.policy_net = None
         self.target_net = None
@@ -31,6 +32,9 @@ class DQNAgent(ABC):
         self.steps = 0
 
     def init_dqn(self):
+        raise NotImplementedError
+
+    def epsilon_decay(self):
         raise NotImplementedError
 
     def select_actions(self, states):
@@ -55,7 +59,7 @@ class DQNAgent(ABC):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-        self.epsilon = max(self.epsilon * self.decay, self.epsilon_min)
+        self.epsilon_decay()
 
     def store_transitions(self, states, actions, rewards, next_states, dones):
         self.memory.push(states, actions, rewards, next_states, dones)

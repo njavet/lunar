@@ -33,6 +33,9 @@ class SmallLunarAgent(DQNAgent):
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.lr)
 
+    def epsilon_decay(self):
+        self.epsilon = max(self.epsilon * self.decay, self.epsilon_min)
+
 
 class MiddleLunarAgent(DQNAgent):
     def __init__(self,
