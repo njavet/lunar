@@ -31,7 +31,7 @@ def get_middle_lunar_params():
 def get_large_lunar_params():
     params = Params(n_envs=1024,
                     decay=0.99999,
-                    batch_size=64,
-                    memory_size=1e4,
+                    batch_size=1024,
+                    memory_size=1e7,
                     max_time_steps=1e5)
     return params

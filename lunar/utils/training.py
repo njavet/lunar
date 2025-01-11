@@ -1,4 +1,5 @@
 import torch
+import time
 import numpy as np
 import gymnasium as gym
 import torch.nn as nn
@@ -23,6 +24,7 @@ class DQN(nn.Module):
 def train_agent(agent, env, max_time_steps, n_envs):
     episode_rewards = np.zeros(n_envs)
     states = env.reset()
+    start = time.time()
     for step in range(max_time_steps):
         actions = agent.select_actions(states)
         next_states, rewards, dones, infos = env.step(actions)
@@ -33,9 +35,12 @@ def train_agent(agent, env, max_time_steps, n_envs):
         if step % 1000 == 0:
             agent.update_target_net()
         if step % 1000 == 0:
+            int_time = time.time()
+            tt = (int_time - start) / 60
             print(f'step: {step}, rewards: {np.mean(episode_rewards)}')
             print(f'eps', agent.epsilon)
-    torch.save(agent.target_net.state_dict(), 'lunar_gpu.pth')
+            print(f'total time: {tt:.2f} min..')
+    torch.save(agent.target_net.state_dict(), 'lunar_gpu_2.pth')
 
 
 def evaluate_policy(fname='lunar.pth'):
