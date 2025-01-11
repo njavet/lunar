@@ -51,7 +51,10 @@ class DQNAgent(ABC):
         if len(self.memory) < self.batch_size:
             return
         states, actions, rewards, next_states, dones = self.memory.sample(self.batch_size)
+        # q_values = self.policy_net(states).gather(1, actions).squeeze()
+        # GPU
         q_values = self.policy_net(states).gather(1, actions.unsqueeze(1)).squeeze(1)
+
         with torch.no_grad():
             next_q_values = self.target_net(next_states).max(1)[0]
         expected_q_values = rewards + (self.gamma * next_q_values * (1 - dones))
@@ -75,8 +78,7 @@ class ReplayMemory:
 
     def push(self, states, actions, rewards, next_states, dones):
         transitions = zip(states, actions, rewards, next_states, dones)
-        for transition in transitions:
-            self.memory.append(transition)
+        self.memory.extend(list(transitions))
 
     def sample(self, batch_size):
         batch = random.sample(self.memory, batch_size)
@@ -118,9 +120,12 @@ class ReplayMemoryGPU:
 
     def push(self, states, actions, rewards, next_states, dones):
         size = len(states)
-        end = (self.index + size) % self.capacity
-        if end < self.index:
+        if self.capacity < self.index + size:
             self.full = True
+            self.index = 0
+            end = size
+        else:
+            end = self.index + size
 
         self.states[self.index:end] = torch.tensor(states, device=self.device)
         self.actions[self.index:end] = torch.tensor(actions, device=self.device).unsqueeze(1)

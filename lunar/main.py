@@ -25,3 +25,17 @@ def train_small_agent():
     env = make_vec_env('LunarLander-v3', n_envs=params.n_envs)
     train_agent(agent, env, params.max_time_steps, params.n_envs)
 
+
+def train_large_agent():
+    params = config.get_large_lunar_params()
+    print('number of envs', params.n_envs)
+    agent = LargeLunarAgent(gamma=params.gamma,
+                            epsilon=params.epsilon,
+                            epsilon_min=params.epsilon_min,
+                            decay=params.decay,
+                            batch_size=params.batch_size,
+                            memory_size=params.memory_size,
+                            update_target_steps=params.update_target_steps,
+                            lr=params.lr)
+    env = make_vec_env('LunarLander-v3', n_envs=params.n_envs)
+    train_agent(agent, env, params.max_time_steps, params.n_envs)

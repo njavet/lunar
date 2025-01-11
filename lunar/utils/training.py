@@ -35,7 +35,7 @@ def train_agent(agent, env, max_time_steps, n_envs):
         if step % 1000 == 0:
             print(f'step: {step}, rewards: {np.mean(episode_rewards)}')
             print(f'eps', agent.epsilon)
-    torch.save(agent.target_net.state_dict(), 'lunar.pth')
+    torch.save(agent.target_net.state_dict(), 'lunar_gpu.pth')
 
 
 def evaluate_policy(fname='lunar.pth'):
