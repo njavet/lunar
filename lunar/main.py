@@ -5,30 +5,29 @@ import torch
 import cv2
 
 # project imports
-from lunar.config import Params
-from lunar.agent import DQNAgent
-from lunar.dqns import LunarDQNSmall, LunarDQNMiddle, LunarDQNLarge
+from lunar import config
+from lunar.agents.lunar_dql import (SmallLunarAgent,
+                                    MiddleLunarAgent,
+                                    LargeLunarAgent)
 
 
 def train_small_agent():
-    params = Params()
-    lunar_agent = DQNAgent(dqn=DQN,
-                           gamma=params.gamma,
-                           epsilon=params.epsilon,
-                           epsilon_min=params.epsilon_min,
-                           decay=params.decay,
-                     batch_size=params.batch_size,
-                     memory_size=params.memory_size,
-                     update_target_steps=params.update_target_steps,
-                     lr=params.lr)
+    params = config.get_small_lunar_params()
+    agent = SmallLunarAgent(gamma=params.gamma,
+                            epsilon=params.epsilon,
+                            epsilon_min=params.epsilon_min,
+                            decay=params.decay,
+                            batch_size=params.batch_size,
+                            memory_size=params.memory_size,
+                            update_target_steps=params.update_target_steps,
+                            lr=params.lr)
     env = make_vec_env('LunarLander-v3', n_envs=params.n_envs)
-    train_agent(agent, env)
+    train_agent(agent, env, params.max_time_steps, params.n)
 
 
-def train_agent(agent, env):
-    max_time_steps = 100000
+def train_agent(agent, env, max_time_steps, n_envs):
+    episode_rewards = np.zeros(n_envs)
     states = env.reset()
-    episode_rewards = np.zeros(32)
     for step in range(max_time_steps):
         actions = agent.select_actions(states)
         next_states, rewards, dones, infos = env.step(actions)

@@ -3,7 +3,6 @@ from collections import deque
 import random
 import numpy as np
 import torch
-import torch.optim as optim
 
 
 class DQNAgent(ABC):
