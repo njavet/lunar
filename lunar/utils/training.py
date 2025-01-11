@@ -1,6 +1,23 @@
 import torch
 import numpy as np
 import gymnasium as gym
+import torch.nn as nn
+
+
+class DQN(nn.Module):
+    def __init__(self, obs_dim=8, action_dim=4):
+        super(DQN, self).__init__()
+        self.fc0 = nn.Linear(obs_dim, 512)
+        self.fc1 = nn.Linear(512, 256)
+        self.fc2 = nn.Linear(256, 128)
+        self.fc3 = nn.Linear(128, action_dim)
+
+    def forward(self, x):
+        x = nn.functional.relu(self.fc0(x))
+        x = nn.functional.relu(self.fc1(x))
+        x = nn.functional.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
 
 
 def train_agent(agent, env, max_time_steps, n_envs):
@@ -22,16 +39,22 @@ def train_agent(agent, env, max_time_steps, n_envs):
 
 
 def evaluate_policy(fname='lunar.pth'):
-    p = torch.load(fname)
-    model = p['target_state_dict']
+    model = DQN()
+    model.load_state_dict(torch.load(fname))
     env = gym.make('LunarLander-v3', render_mode='human')
     done = False
     state, _ = env.reset()
+    total_reward = 0
     while not done:
-        action = model(state).argmax()
+        state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+        action = model(state).argmax().cpu().numpy()
+        #action = np.random.randint(0, 4)
         ns, r, term, trunc, info = env.step(action)
+        print('reward', r)
+        total_reward += r
         done = term or trunc
         state = ns
+    print('TOT', total_reward)
 
 
 def load_checkpoint(agent, filename='checkpoint.pth'):

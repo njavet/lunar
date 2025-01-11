@@ -23,5 +23,5 @@ def train_small_agent():
                             update_target_steps=params.update_target_steps,
                             lr=params.lr)
     env = make_vec_env('LunarLander-v3', n_envs=params.n_envs)
-    train_agent(agent, env, params.max_time_steps, params.n)
+    train_agent(agent, env, params.max_time_steps, params.n_envs)
 
