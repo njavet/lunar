@@ -96,3 +96,46 @@ class ReplayMemory:
 
     def __len__(self):
         return len(self.memory)
+
+
+class ReplayMemoryGPU:
+    def __init__(self, device: torch.device, memory_size: int, state_shape: tuple):
+        self.device = device
+        self.capacity = memory_size
+        self.index = 0
+        self.full = False
+
+        # Pre-allocate memory on GPU
+        self.states = torch.zeros((memory_size, *state_shape), dtype=torch.float32, device=self.device)
+        self.actions = torch.zeros(memory_size, 1, dtype=torch.long, device=self.device)
+        self.rewards = torch.zeros(memory_size, 1, dtype=torch.float32, device=self.device)
+        self.next_states = torch.zeros((memory_size, *state_shape), dtype=torch.float32, device=self.device)
+        self.dones = torch.zeros(memory_size, 1, dtype=torch.float32, device=self.device)
+
+    def push(self, states, actions, rewards, next_states, dones):
+        size = len(states)
+        end = (self.index + size) % self.capacity
+        if end < self.index:
+            self.full = True
+
+        self.states[self.index:end] = torch.tensor(states, device=self.device)
+        self.actions[self.index:end] = torch.tensor(actions, device=self.device).unsqueeze(1)
+        self.rewards[self.index:end] = torch.tensor(rewards, device=self.device).unsqueeze(1)
+        self.next_states[self.index:end] = torch.tensor(next_states, device=self.device)
+        self.dones[self.index:end] = torch.tensor(dones, device=self.device).unsqueeze(1)
+
+        self.index = end
+
+    def sample(self, batch_size):
+        max_idx = self.capacity if self.full else self.index
+        indices = torch.randint(0, max_idx, (batch_size,), device=self.device)
+        return (
+            self.states[indices],
+            self.actions[indices],
+            self.rewards[indices],
+            self.next_states[indices],
+            self.dones[indices]
+        )
+
+    def __len__(self):
+        return self.capacity if self.full else self.index
