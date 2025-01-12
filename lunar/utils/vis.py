@@ -1,5 +1,8 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
+import torch
+import gymnasium as gym
+from gymnasium.wrappers import RecordVideo
 
 
 def plot_tracker(tracker):
@@ -21,12 +24,16 @@ def plot_tracker(tracker):
     plt.savefig('episodes.png')
 
 
-def record_video():
-    height, width = agent.images[0].shape[0], agent.images[0].shape[1]
-    video = cv2.VideoWriter('dqn2048.mp4',
-                            cv2.VideoWriter_fourcc(*'mp4v'),
-                            4,
-                            (width, height))
-    for img in agent.images:
-        video.write(cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
-    video.release()
+def record_video(agent, env: gym.Env, seed: int, video_path: str):
+    env = RecordVideo(env,
+                      video_folder=video_path)
+    state, _ = env.reset(seed=seed)
+    done = False
+    while not done:
+        state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+        action = agent.optimal_policy(state)
+        ns, reward, term, trunc, info = env.step(action)
+        state = ns
+        done = term or trunc
+
+    env.close()

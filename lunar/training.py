@@ -39,34 +39,17 @@ def train_agent(agent, env, max_time_steps, n_envs, filename='lunar.pth'):
     torch.save(agent.target_net.state_dict(), filename)
 
 
-def evaluate_policy(agent=None, fname='lunar.pth'):
-    params = config.get_2048_params()
-    agent = G2048Agent(gamma=params.gamma,
-                       epsilon=0.01,
-                       epsilon_min=params.epsilon_min,
-                       batch_size=params.batch_size,
-                       memory_size=params.memory_size,
-                       update_target_steps=params.update_target_steps,
-                       max_time_steps=params.max_time_steps,
-                       lr=params.lr)
-    agent.target_net.load_state_dict(torch.load(fname))
-    #env = gym.make('LunarLander-v3', render_mode='human')
-    env = gym.make('Game2048-v0', render_mode='human')
+def evaluate_policy(agent, fname=None):
+    if fname is not None:
+        agent.target_net.load_state_dict(torch.load(fname))
+    env = gym.make('LunarLander-v3', render_mode='human')
     done = False
     state, _ = env.reset()
     total_reward = 0
     while not done:
         state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
         action = agent.optimal_policy(state)
-
         ns, r, term, trunc, info = env.step(action)
-        if r == -1:
-            import numpy as np
-            action = np.random.randint(0, 4)
-            ns, r, term, trunc, info = env.step(action)
-
-
-        print('reward', r)
         total_reward += r
         done = term or trunc
         state = ns
