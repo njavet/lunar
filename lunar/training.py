@@ -41,7 +41,7 @@ def train_agent(agent, env, max_time_steps, n_envs, filename='lunar.pth'):
             console.print(f'mean reward: {logs['mean_reward']}')
             console.print(f'std reward: {logs['std_reward']}')
             console.print(f'mean length: {logs['mean_length']}')
-            console.print(f'max tile: {max_tile}, occurrence: {occ}')
+            console.print(f'max tile: {curr_max}, occurrence: {occ}')
     torch.save(agent.target_net.state_dict(), filename)
 
 
