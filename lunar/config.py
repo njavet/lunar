@@ -12,14 +12,16 @@ class Params(BaseModel):
     batch_size: int = 512
     memory_size: int = 1e5
     update_target_steps: int = 1024
+    training_freq: int = 4
     lr: float = 0.001
     max_time_steps: int = 1e5
 
 
 def get_small_lunar_params():
-    params = Params(n_envs=32,
+    params = Params(n_envs=128,
                     batch_size=512,
-                    memory_size=1e5,
+                    memory_size=1e7,
+                    training_freq=128,
                     max_time_steps=1e5)
     return params
 

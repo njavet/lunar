@@ -14,6 +14,7 @@ class DQNAgent(ABC):
                  batch_size: int,
                  memory_size: int,
                  update_target_steps: int,
+                 training_freq: int,
                  max_time_steps: int,
                  lr: float) -> None:
         self.dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -27,6 +28,7 @@ class DQNAgent(ABC):
         self.decay_steps = self.compute_decay_steps()
         self.batch_size = batch_size
         self.update_target_steps = update_target_steps
+        self.training_freq = training_freq
         self.lr = lr
         self.policy_net = None
         self.target_net = None
@@ -66,6 +68,8 @@ class DQNAgent(ABC):
     def learn(self):
         self.steps += 1
         if len(self.memory) < self.batch_size:
+            return
+        if self.steps % self.training_freq != 0:
             return
         states, actions, rewards, next_states, dones = self.memory.sample(self.batch_size)
         q_values = self.policy_net(states).gather(1, actions).squeeze()

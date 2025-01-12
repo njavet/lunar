@@ -15,6 +15,7 @@ class SmallLunarAgent(DQNAgent):
                  batch_size: int,
                  memory_size: int,
                  update_target_steps: int,
+                 training_freq: int,
                  max_time_steps: int,
                  lr: float) -> None:
         super().__init__(gamma,
@@ -24,6 +25,7 @@ class SmallLunarAgent(DQNAgent):
                          batch_size,
                          memory_size,
                          update_target_steps,
+                         training_freq,
                          max_time_steps,
                          lr)
         self.dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
