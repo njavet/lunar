@@ -10,7 +10,7 @@ class Params(BaseModel):
     epsilon_min: float = 0.01
     decay: float = 0.9999
     batch_size: int = 512
-    memory_size: int = 5000000
+    memory_size: int = 1000000
     update_target_steps: int = 1024
     lr: float = 0.0005
     max_time_steps: int = 10000
@@ -41,8 +41,10 @@ def get_large_lunar_params():
 def get_2048_params():
     params = Params(obs_dim=256,
                     action_dim=4,
-                    n_envs=1024,
+                    n_envs=128,
                     gamma=1,
+                    batch_size=512,
+                    memory_size=1e5,
                     max_time_steps=1e5
                     )
     return params

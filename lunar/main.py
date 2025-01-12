@@ -1,7 +1,7 @@
 import gymnasium as gym
 import numpy as np
 from stable_baselines3.common.env_util import make_vec_env
-from stable_baselines3.common.vec_env import SubprocVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 import torch
 import cv2
 

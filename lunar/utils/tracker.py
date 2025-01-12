@@ -10,7 +10,7 @@ class Tracker:
         self.total_rewards = []
         self.total_lengths = []
 
-    def update(self, epsilon, rewards, dones):
+    def update(self, epsilon, rewards, dones, infos):
         self.epsilons.append(epsilon)
         self.episode_rewards += rewards
         self.episode_lengths += 1

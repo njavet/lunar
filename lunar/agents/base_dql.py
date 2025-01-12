@@ -36,8 +36,10 @@ class DQNAgent(ABC):
         raise NotImplementedError
 
     def compute_decay_steps(self, proc=0.8):
-        tmp = np.log(np.finfo(float).eps) / -proc
-        return int(proc * self.max_time_steps / tmp)
+        tol = 0.0001
+        a = proc * self.max_time_steps
+        b = np.log(tol) * -proc
+        return int(a / b)
 
     def epsilon_decay(self):
         tmp = (1 - self.epsilon_min) * np.exp(-self.steps / self.decay_steps)

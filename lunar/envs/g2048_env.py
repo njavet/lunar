@@ -19,6 +19,7 @@ class Env2048(gym.Env):
         self.action_space = Discrete(4)
         self.board = np.zeros((4, 4))
         self.score = 0
+        self.max_tile = 0
         self.window_size = 512
         self.window = None
         self.clock = None
@@ -27,10 +28,11 @@ class Env2048(gym.Env):
         return state.board_to_state(self.board)
 
     def get_info(self):
-        return {'score': self.score}
+        return {'score': self.score, 'max_tile': self.max_tile}
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
+        self.max_tile = 0
         self.board = np.zeros((4, 4), dtype=np.int64)
         self.score = 0
         self.board = state.add_random_tile(self.board)
@@ -50,7 +52,8 @@ class Env2048(gym.Env):
 
         if not np.array_equal(self.board, new_board):
             self.board = state.add_random_tile(new_board)
-            reward = score + 1
+            self.max_tile = np.max(self.board)
+            reward = score + 10 + self.max_tile
         else:
             reward = -1
 
