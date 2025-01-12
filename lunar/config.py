@@ -45,7 +45,7 @@ def get_2048_params():
                     gamma=1,
                     batch_size=512,
                     memory_size=1e5,
-                    max_time_steps=1e5
+                    max_time_steps=2e5
                     )
     return params
 
