@@ -37,6 +37,13 @@ class DQNAgent(ABC):
     def epsilon_decay(self):
         raise NotImplementedError
 
+    def optimal_policy(self, states):
+        states = torch.tensor(states, dtype=torch.float32, device=self.dev)
+        with torch.no_grad():
+            q_values = self.target_net(states)
+        actions = q_values.argmax(dim=1)
+        return actions.cpu().numpy()
+
     def select_actions(self, states):
         if random.random() < self.epsilon:
             return torch.randint(0, 4, (len(states),), device=self.dev).cpu().numpy()
