@@ -50,3 +50,28 @@ class LargeLunarDQN(nn.Module):
 
     def forward(self, x):
         return self.net(x)
+
+
+class ConNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(16, 64, kernel_size=2),
+            nn.ReLU(),
+            nn.Conv2d(64, 128, kernel_size=2),
+            nn.ReLU()
+        )
+        self.fc = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(128 * 2 * 2, 256),
+            nn.ReLU(),
+            nn.Linear(256, 512),
+            nn.ReLU(),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Linear(256, 4)
+        )
+
+    def forward(self, x):
+        x = self.conv(x)
+        return self.fc(x)

@@ -24,6 +24,7 @@ def train_agent(agent, env, max_time_steps, n_envs, filename='lunar.pth'):
         if step % 1000 == 0:
             int_time = time.time()
             tt = (int_time - start) / 60
+            console.print(64*'-', style='grey')
             console.print(f'steps: {step}', style='cyan')
             console.print(f'current epsilon: {agent.epsilon:.4f}', style='#6312ff')
             console.print(f'Total Time: {tt:.2f} minutes...')
@@ -34,7 +35,7 @@ def train_agent(agent, env, max_time_steps, n_envs, filename='lunar.pth'):
     torch.save(agent.target_net.state_dict(), filename)
 
 
-def evaluate_policy(agent, fname='lunar_01.pth'):
+def evaluate_policy(agent, fname='lunar.pth'):
     agent.target_net.load_state_dict(torch.load(fname))
     env = gym.make('LunarLander-v3', render_mode='human')
     done = False

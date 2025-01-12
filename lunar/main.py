@@ -6,7 +6,7 @@ import cv2
 
 # project imports
 from lunar import config
-from lunar.utils.training import train_agent, evaluate_policy
+from lunar.training import train_agent, evaluate_policy
 from lunar.agents.lunar_dql import (SmallLunarAgent,
                                     MiddleLunarAgent,
                                     LargeLunarAgent)

@@ -22,6 +22,6 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-train = "lunar.main:train_large_agent"
+train = "lunar.main:train_small_agent"
 eval = "lunar.utils.training:evaluate_policy"
 
