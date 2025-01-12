@@ -3,8 +3,8 @@ import gymnasium as gym
 from collections import defaultdict
 
 # project imports
-from rai.rl.agents.schopenhauer import SchopenhauerAgent
-from rai.utils.helpers import random_argmax
+from lunar.agents.schopenhauer import SchopenhauerAgent
+from lunar.utils.helpers import random_argmax
 
 
 class QAgent(SchopenhauerAgent):

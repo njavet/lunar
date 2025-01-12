@@ -14,6 +14,7 @@ opencv-python = "^4.10.0.84"
 rich = "^13.9.4"
 pandas = "^2.2.3"
 ipython = "^8.31.0"
+seaborn = "^0.13.2"
 
 
 [build-system]

@@ -16,8 +16,8 @@ class DQNAgent(ABC):
                  update_target_steps: int,
                  lr: float) -> None:
         self.dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        #self.memory = ReplayMemory(self.dev, memory_size=memory_size)
-        self.memory = ReplayMemoryGPU(self.dev, memory_size=memory_size, state_shape=(8,))
+        self.memory = ReplayMemory(self.dev, memory_size=memory_size)
+        # self.memory = ReplayMemoryGPU(self.dev, memory_size=memory_size, state_shape=(8,))
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
@@ -51,9 +51,9 @@ class DQNAgent(ABC):
         if len(self.memory) < self.batch_size:
             return
         states, actions, rewards, next_states, dones = self.memory.sample(self.batch_size)
-        # q_values = self.policy_net(states).gather(1, actions).squeeze()
+        q_values = self.policy_net(states).gather(1, actions).squeeze()
         # GPU
-        q_values = self.policy_net(states).gather(1, actions.unsqueeze(1)).squeeze(1)
+        #q_values = self.policy_net(states).gather(1, actions.unsqueeze(1)).squeeze(1)
 
         with torch.no_grad():
             next_q_values = self.target_net(next_states).max(1)[0]

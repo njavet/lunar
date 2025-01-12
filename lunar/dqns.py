@@ -39,11 +39,11 @@ class LargeLunarDQN(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(8, 256),
             nn.ReLU(),
-            nn.Linear(256, 512),
+            nn.Linear(256, 1024),
             nn.ReLU(),
-            nn.Linear(512, 512),
+            nn.Linear(1024, 1024),
             nn.ReLU(),
-            nn.Linear(512, 256),
+            nn.Linear(1024, 256),
             nn.ReLU(),
             nn.Linear(256, 4)
         )

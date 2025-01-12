@@ -4,6 +4,7 @@ import numpy as np
 import gymnasium as gym
 import torch.nn as nn
 
+from lunar.dqns import LargeLunarDQN
 
 class DQN(nn.Module):
     def __init__(self, obs_dim=8, action_dim=4):
@@ -40,11 +41,11 @@ def train_agent(agent, env, max_time_steps, n_envs):
             print(f'step: {step}, rewards: {np.mean(episode_rewards)}')
             print(f'eps', agent.epsilon)
             print(f'total time: {tt:.2f} min..')
-    torch.save(agent.target_net.state_dict(), 'lunar_gpu_2.pth')
+    torch.save(agent.target_net.state_dict(), 'lunar_02.pth')
 
 
-def evaluate_policy(fname='lunar.pth'):
-    model = DQN()
+def evaluate_policy(fname='lunar_01.pth'):
+    model = LargeLunarDQN()
     model.load_state_dict(torch.load(fname))
     env = gym.make('LunarLander-v3', render_mode='human')
     done = False

@@ -3,8 +3,8 @@ import gymnasium as gym
 from collections import defaultdict
 
 # project imports
-from rai.rl.agents.schopenhauer import SchopenhauerAgent
-from rai.utils.helpers import random_argmax
+from lunar.agents.schopenhauer import SchopenhauerAgent
+from lunar.utils.helpers import random_argmax
 
 
 class MonteCarlo(SchopenhauerAgent):
@@ -25,7 +25,7 @@ class MonteCarlo(SchopenhauerAgent):
                                 env.action_space.n))
         self.returns = defaultdict(list)
         self.counts = defaultdict(int)
-        self.trajectories = defaultdict(list)
+        self.trajectories = defaultdict()
 
     def policy(self, state: int) -> int:
         if np.random.rand() < self.eps:
