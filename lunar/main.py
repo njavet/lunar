@@ -21,6 +21,7 @@ def train_small_agent():
     agent = SmallLunarAgent(gamma=params.gamma,
                             epsilon=params.epsilon,
                             epsilon_min=params.epsilon_min,
+                            decay_proc=params.decay_proc,
                             batch_size=params.batch_size,
                             memory_size=params.memory_size,
                             update_target_steps=params.update_target_steps,
@@ -33,7 +34,7 @@ def train_small_agent():
 
 def main():
     agent = train_small_agent()
-    env = gym.make('LunarLander-v3')
+    env = gym.make('LunarLander-v3', render_mode='rgb_array')
     record_video(agent, env, 1, '.')
     evaluate_policy(agent)
 

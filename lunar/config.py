@@ -17,10 +17,10 @@ class Params(BaseModel):
 
 
 def get_small_lunar_params():
-    params = Params(n_envs=512,
+    params = Params(n_envs=32,
                     batch_size=512,
                     memory_size=1e5,
-                    max_time_steps=1e4)
+                    max_time_steps=1e5)
     return params
 
 
@@ -45,8 +45,7 @@ def get_2048_params():
                     gamma=1,
                     batch_size=512,
                     memory_size=1e5,
-                    max_time_steps=2e5
-                    )
+                    max_time_steps=2e5)
     return params
 
 

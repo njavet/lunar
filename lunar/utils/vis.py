@@ -25,8 +25,7 @@ def plot_tracker(tracker):
 
 
 def record_video(agent, env: gym.Env, seed: int, video_path: str):
-    env = RecordVideo(env,
-                      video_folder=video_path)
+    env = RecordVideo(env, video_folder=video_path)
     state, _ = env.reset(seed=seed)
     done = False
     while not done:
