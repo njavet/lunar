@@ -11,6 +11,7 @@ class SmallLunarAgent(DQNAgent):
                  gamma: float,
                  epsilon: float,
                  epsilon_min: float,
+                 decay_proc: float,
                  batch_size: int,
                  memory_size: int,
                  update_target_steps: int,
@@ -19,6 +20,7 @@ class SmallLunarAgent(DQNAgent):
         super().__init__(gamma,
                          epsilon,
                          epsilon_min,
+                         decay_proc,
                          batch_size,
                          memory_size,
                          update_target_steps,
@@ -61,9 +63,6 @@ class MiddleLunarAgent(DQNAgent):
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.lr)
 
-    def epsilon_decay(self):
-        self.epsilon = max(self.epsilon * self.decay, self.epsilon_min)
-
 
 class LargeLunarAgent(DQNAgent):
     def __init__(self,
@@ -92,5 +91,3 @@ class LargeLunarAgent(DQNAgent):
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.lr)
 
-    def epsilon_decay(self):
-        self.epsilon = max(self.epsilon * self.decay, self.epsilon_min)

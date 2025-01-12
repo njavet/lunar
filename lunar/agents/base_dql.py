@@ -10,6 +10,7 @@ class DQNAgent(ABC):
                  gamma: float,
                  epsilon: float,
                  epsilon_min: float,
+                 decay_proc: float,
                  batch_size: int,
                  memory_size: int,
                  update_target_steps: int,
@@ -21,6 +22,7 @@ class DQNAgent(ABC):
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
+        self.decay_proc = decay_proc
         self.max_time_steps = max_time_steps
         self.decay_steps = self.compute_decay_steps()
         self.batch_size = batch_size
@@ -35,10 +37,10 @@ class DQNAgent(ABC):
     def init_dqn(self):
         raise NotImplementedError
 
-    def compute_decay_steps(self, proc=0.8):
+    def compute_decay_steps(self):
         tol = 0.0001
-        a = proc * self.max_time_steps
-        b = np.log(tol) * -proc
+        a = self.decay_proc * self.max_time_steps
+        b = np.log(tol) * -self.decay_proc
         return int(a / b)
 
     def epsilon_decay(self):

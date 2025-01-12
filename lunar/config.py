@@ -8,7 +8,7 @@ class Params(BaseModel):
     gamma: float = 0.99
     epsilon: float = 1.0
     epsilon_min: float = 0.01
-    decay: float = 0.9999
+    decay_proc: float = 0.5
     batch_size: int = 512
     memory_size: int = 1e5
     update_target_steps: int = 1024

@@ -15,21 +15,16 @@ def train_agent(agent, env, max_time_steps, n_envs, filename='lunar.pth'):
     console = Console()
     states = env.reset()
     start = time.time()
-    max_tile = 0
     for step in range(max_time_steps):
         actions = agent.select_actions(states)
         next_states, rewards, dones, infos = env.step(actions)
-        max_tiles = [info['max_tile'] for info in infos]
-        curr_max = max(max_tiles)
-        occ = max_tiles.count(curr_max)
-        max_tile = max(max_tile, curr_max)
         tracker.update(agent.epsilon, rewards, dones, infos)
         agent.store_transitions(states, actions, rewards, next_states, dones)
         agent.learn()
         states = next_states
         if step % 1000 == 0:
             agent.update_target_net()
-        if step % 2000 == 0:
+        if step % 1000 == 0:
             gc.collect()
             int_time = time.time()
             tt = (int_time - start) / 60
@@ -41,11 +36,10 @@ def train_agent(agent, env, max_time_steps, n_envs, filename='lunar.pth'):
             console.print(f'mean reward: {logs['mean_reward']}')
             console.print(f'std reward: {logs['std_reward']}')
             console.print(f'mean length: {logs['mean_length']}')
-            console.print(f'max tile: {curr_max}, occurrence: {occ}')
     torch.save(agent.target_net.state_dict(), filename)
 
 
-def evaluate_policy(agent=None, fname='g2048.pth'):
+def evaluate_policy(agent=None, fname='lunar.pth'):
     params = config.get_2048_params()
     agent = G2048Agent(gamma=params.gamma,
                        epsilon=0.01,
