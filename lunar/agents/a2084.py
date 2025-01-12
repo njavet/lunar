@@ -25,7 +25,6 @@ class G2048Agent(DQNAgent):
                          max_time_steps,
                          lr)
         self.dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.init_dqn()
 
     def init_dqn(self):
         self.policy_net = ConNet().to(self.dev)

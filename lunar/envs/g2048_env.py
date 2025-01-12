@@ -23,6 +23,7 @@ class Env2048(gym.Env):
         self.window_size = 512
         self.window = None
         self.clock = None
+        self.corners = self.board[[0, 0, 3, 3], [0, 3, 0, 3]]
 
     def get_obs(self):
         return state.board_to_state(self.board)
@@ -53,7 +54,9 @@ class Env2048(gym.Env):
         if not np.array_equal(self.board, new_board):
             self.board = state.add_random_tile(new_board)
             self.max_tile = np.max(self.board)
-            reward = score + 10 + self.max_tile
+            in_corner = np.any(self.corners == self.max_tile)
+            zeros = 16 - np.count_nonzero(self.board)
+            reward = score + 1 + self.max_tile / 512 + zeros / 16 + in_corner
         else:
             reward = -1
 

@@ -29,16 +29,17 @@ def train_agent(agent, env, max_time_steps, n_envs, filename='lunar.pth'):
         states = next_states
         if step % 1000 == 0:
             agent.update_target_net()
-        if step % 1000 == 0:
+        if step % 2000 == 0:
             gc.collect()
             int_time = time.time()
             tt = (int_time - start) / 60
             logs = tracker.get_logs()
-            console.print(f'Total Time: {tt:.2f} minutes...')
             console.print(64*'-', style='blue')
+            console.print(f'Total Time: {tt:.2f} minutes...')
             console.print(f'steps: {step} / episodes: {logs['episodes']}')
             console.print(f'current epsilon: {agent.epsilon:.4f}', style='#6312ff')
             console.print(f'mean reward: {logs['mean_reward']}')
+            console.print(f'std reward: {logs['std_reward']}')
             console.print(f'mean length: {logs['mean_length']}')
             console.print(f'max tile: {max_tile}, occurrence: {occ}')
     torch.save(agent.target_net.state_dict(), filename)

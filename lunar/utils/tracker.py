@@ -25,7 +25,9 @@ class Tracker:
     def get_logs(self):
         mean_reward = np.mean(self.total_rewards) if self.total_rewards else 0
         mean_length = np.mean(self.total_lengths) if self.total_lengths else 0
+        std_reward = np.std(self.total_rewards) if self.total_rewards else 0
         episodes = len(self.total_lengths)
-        return {'mean_reward': mean_reward,
-                'mean_length': mean_length,
+        return {'mean_reward': int(mean_reward),
+                'std_reward': int(std_reward),
+                'mean_length': int(mean_length),
                 'episodes': episodes}

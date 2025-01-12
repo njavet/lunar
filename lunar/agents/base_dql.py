@@ -26,10 +26,10 @@ class DQNAgent(ABC):
         self.batch_size = batch_size
         self.update_target_steps = update_target_steps
         self.lr = lr
-        self.init_dqn()
         self.policy_net = None
         self.target_net = None
         self.optimizer = None
+        self.init_dqn()
         self.steps = 0
 
     def init_dqn(self):
