@@ -48,7 +48,7 @@ def train_agent(agent, env, max_time_steps, n_envs, filename='lunar.pth'):
 def evaluate_policy(agent=None, fname='g2048.pth'):
     params = config.get_2048_params()
     agent = G2048Agent(gamma=params.gamma,
-                       epsilon=params.epsilon,
+                       epsilon=0.01,
                        epsilon_min=params.epsilon_min,
                        batch_size=params.batch_size,
                        memory_size=params.memory_size,
@@ -64,7 +64,14 @@ def evaluate_policy(agent=None, fname='g2048.pth'):
     while not done:
         state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
         action = agent.optimal_policy(state)
+
         ns, r, term, trunc, info = env.step(action)
+        if r == -1:
+            import numpy as np
+            action = np.random.randint(0, 4)
+            ns, r, term, trunc, info = env.step(action)
+
+
         print('reward', r)
         total_reward += r
         done = term or trunc

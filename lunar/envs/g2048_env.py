@@ -56,9 +56,9 @@ class Env2048(gym.Env):
             self.max_tile = np.max(self.board)
             in_corner = np.any(self.corners == self.max_tile)
             zeros = 16 - np.count_nonzero(self.board)
-            reward = score + 1 + self.max_tile / 512 + zeros / 16 + in_corner
+            reward = score + 1 + self.max_tile / 512 + zeros / 16 + 2*in_corner
         else:
-            reward = -1
+            reward = -2
 
         observation = self.get_obs()
         game_over = state.game_over(self.board)
