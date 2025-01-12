@@ -20,7 +20,7 @@ def get_small_lunar_params():
     params = Params(n_envs=512,
                     decay=0.9995,
                     memory_size=1e6,
-                    max_time_steps=1e5)
+                    max_time_steps=1e3)
     return params
 
 
@@ -41,6 +41,9 @@ def get_large_lunar_params():
 def get_2048_params():
     params = Params(obs_dim=256,
                     action_dim=4,
+                    n_envs=1024,
+                    gamma=1,
+                    max_time_steps=1e5
                     )
     return params
 

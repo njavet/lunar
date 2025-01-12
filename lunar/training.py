@@ -5,6 +5,8 @@ import gymnasium as gym
 
 # project imports
 from lunar.utils.tracker import Tracker
+from lunar import config
+from lunar.agents.a2084 import G2048Agent
 
 
 def train_agent(agent, env, max_time_steps, n_envs, filename='lunar.pth'):
@@ -24,7 +26,7 @@ def train_agent(agent, env, max_time_steps, n_envs, filename='lunar.pth'):
         if step % 1000 == 0:
             int_time = time.time()
             tt = (int_time - start) / 60
-            console.print(64*'-', style='grey')
+            console.print(64*'-', style='blue')
             console.print(f'steps: {step}', style='cyan')
             console.print(f'current epsilon: {agent.epsilon:.4f}', style='#6312ff')
             console.print(f'Total Time: {tt:.2f} minutes...')
@@ -35,9 +37,19 @@ def train_agent(agent, env, max_time_steps, n_envs, filename='lunar.pth'):
     torch.save(agent.target_net.state_dict(), filename)
 
 
-def evaluate_policy(agent, fname='lunar.pth'):
+def evaluate_policy(agent=None, fname='g2048.pth'):
+    params = config.get_2048_params()
+    agent = G2048Agent(gamma=params.gamma,
+                       epsilon=params.epsilon,
+                       epsilon_min=params.epsilon_min,
+                       decay=params.decay,
+                       batch_size=params.batch_size,
+                       memory_size=params.memory_size,
+                       update_target_steps=params.update_target_steps,
+                       lr=params.lr)
     agent.target_net.load_state_dict(torch.load(fname))
-    env = gym.make('LunarLander-v3', render_mode='human')
+    #env = gym.make('LunarLander-v3', render_mode='human')
+    env = gym.make('Game2048-v0', render_mode='human')
     done = False
     state, _ = env.reset()
     total_reward = 0

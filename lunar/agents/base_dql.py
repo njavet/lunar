@@ -10,10 +10,10 @@ class DQNAgent(ABC):
                  gamma: float,
                  epsilon: float,
                  epsilon_min: float,
-                 decay: float,
                  batch_size: int,
                  memory_size: int,
                  update_target_steps: int,
+                 max_time_steps: int,
                  lr: float) -> None:
         self.dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.memory = ReplayMemory(self.dev, memory_size=memory_size)
@@ -21,7 +21,8 @@ class DQNAgent(ABC):
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
-        self.decay = decay
+        self.max_time_steps = max_time_steps
+        self.decay_steps = self.compute_decay_steps()
         self.batch_size = batch_size
         self.update_target_steps = update_target_steps
         self.lr = lr
@@ -34,8 +35,13 @@ class DQNAgent(ABC):
     def init_dqn(self):
         raise NotImplementedError
 
+    def compute_decay_steps(self, proc=0.8):
+        tmp = np.log(np.finfo(float).eps) / -proc
+        return int(proc * self.max_time_steps / tmp)
+
     def epsilon_decay(self):
-        raise NotImplementedError
+        tmp = (1 - self.epsilon_min) * np.exp(-self.steps / self.decay_steps)
+        self.epsilon = self.epsilon_min + tmp
 
     def optimal_policy(self, states):
         states = torch.tensor(states, dtype=torch.float32, device=self.dev)

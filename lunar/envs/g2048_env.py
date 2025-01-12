@@ -90,6 +90,7 @@ class Env2048(gym.Env):
         for i, row in enumerate(self.board):
             for j, cell in enumerate(row):
                 cell = int(cell)
+
                 color = config.TILE_COLORS.get(cell, config.TILE_COLORS[4096])
                 # different coordinate system
                 x = config.GAP_SIZE + j * cell_size + 2
@@ -124,7 +125,7 @@ class Env2048(gym.Env):
                 width=3,
             )
 
-        if self.render_mode == 'uhuman':
+        if self.render_mode == 'human':
             # The following line copies our drawings from `canvas`
             # to the visible window
             self.window.blit(canvas, canvas.get_rect())

@@ -24,7 +24,7 @@ def board_to_state(board: np.ndarray) -> np.ndarray:
     rs, cs = np.where(board != 0)
     one_hot = np.log2(board[rs, cs]).astype(np.uint8)
     state[one_hot, rs, cs] = 1
-    return state
+    return state.astype(np.float32)
 
 
 def shift_left(board: np.ndarray) -> np.ndarray:
@@ -102,7 +102,7 @@ def game_over(board: np.ndarray) -> bool:
 
 
 def add_random_tile(board: np.ndarray) -> np.ndarray:
-    r, c = np.where(board == 0)
+    r, c = random.choice(np.argwhere(board == 0))
     new_board = board.copy()
     new_board[r, c] = 2 if random.random() < 0.9 else 4
     return new_board
