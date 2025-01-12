@@ -20,10 +20,10 @@ def train_small_agent():
     agent = SmallLunarAgent(gamma=params.gamma,
                             epsilon=params.epsilon,
                             epsilon_min=params.epsilon_min,
-                            decay=params.decay,
                             batch_size=params.batch_size,
                             memory_size=params.memory_size,
                             update_target_steps=params.update_target_steps,
+                            max_time_steps=params.max_time_steps,
                             lr=params.lr)
     env = make_vec_env('LunarLander-v3', n_envs=params.n_envs)
     train_agent(agent, env, params.max_time_steps, params.n_envs)

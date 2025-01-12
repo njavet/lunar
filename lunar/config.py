@@ -10,17 +10,17 @@ class Params(BaseModel):
     epsilon_min: float = 0.01
     decay: float = 0.9999
     batch_size: int = 512
-    memory_size: int = 1000000
+    memory_size: int = 1e5
     update_target_steps: int = 1024
-    lr: float = 0.0005
-    max_time_steps: int = 10000
+    lr: float = 0.001
+    max_time_steps: int = 1e5
 
 
 def get_small_lunar_params():
     params = Params(n_envs=512,
-                    decay=0.9995,
-                    memory_size=1e6,
-                    max_time_steps=1e3)
+                    batch_size=512,
+                    memory_size=1e5,
+                    max_time_steps=1e4)
     return params
 
 
