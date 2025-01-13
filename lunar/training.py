@@ -2,6 +2,7 @@ import gc
 import time
 from rich.console import Console
 import torch
+import pandas as pd
 import numpy as np
 
 
@@ -21,6 +22,7 @@ def train_agent(agent, env, params):
             gc.collect()
             tracker.print_logs(step)
     torch.save(agent.target_net.state_dict(), params.filename)
+    tracker.save_logs()
 
 
 def evaluate_policy(agent, env, filename=None):
@@ -30,7 +32,6 @@ def evaluate_policy(agent, env, filename=None):
     done = False
     state, _ = env.reset()
     while not done:
-        state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
         action = agent.optimal_policy(state)
         next_state, reward, term, trunc, info = env.step(action)
         done = term or trunc
@@ -60,6 +61,14 @@ class Tracker:
                 self.total_lengths.append(self.episode_lengths[i])
                 self.episode_rewards[i] = 0
                 self.episode_lengths[i] = 0
+
+    def save_logs(self):
+        df0 = pd.DataFrame({'total_rewards': self.total_rewards})
+        df1 = pd.DataFrame({'total_lengths': self.total_lengths})
+        df2 = pd.DataFrame({'epsilons': self.epsilons})
+        df0.to_csv('total_rewards.csv')
+        df1.to_csv('total_length.csv')
+        df2.to_csv('epsilons.csv')
 
     def print_logs(self, step):
         curr_time = time.time()

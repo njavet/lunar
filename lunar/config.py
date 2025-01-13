@@ -8,9 +8,9 @@ class Params(BaseModel):
     epsilon_min: float = 0.01
     decay_proc: float = 0.8
     batch_size: int = 512
-    memory_size: int = 1e6
+    memory_size: int = 1000000
     update_target_steps: int = 1024
     training_freq: int = 1
     lr: float = 0.001
-    max_time_steps: int = 1e5
+    max_time_steps: int = 100000
     filename: str = 'lunar.pth'

@@ -26,17 +26,17 @@ class Agent:
         self.epsilon_min = epsilon_min
         self.decay_proc = decay_proc
         self.max_time_steps = max_time_steps
-        self.decay_steps = self.compute_decay_steps()
         self.batch_size = batch_size
         self.update_target_steps = update_target_steps
         self.training_freq = training_freq
         self.lr = lr
         self.tol = tol
+        self.steps = 0
+        self.decay_steps = self.compute_decay_steps()
         self.policy_net = LunarDQN().to(self.dev)
         self.target_net = LunarDQN().to(self.dev)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.lr)
-        self.steps = 0
 
     def compute_decay_steps(self):
         a = self.decay_proc * self.max_time_steps
@@ -51,7 +51,10 @@ class Agent:
         states = torch.tensor(states, dtype=torch.float32, device=self.dev)
         with torch.no_grad():
             q_values = self.target_net(states)
-        actions = q_values.argmax(dim=1)
+        try:
+            actions = q_values.argmax(dim=1)
+        except IndexError:
+            actions = q_values.argmax()
         return actions.cpu().numpy()
 
     def select_actions(self, states):
@@ -74,6 +77,7 @@ class Agent:
         q_values = self.policy_net(states).gather(1, actions).squeeze()
         with torch.no_grad():
             next_q_values = self.target_net(next_states).max(1)[0]
+            next_q_values[dones] = 0.
         expected_q_values = rewards + (self.gamma * next_q_values * (1 - dones))
         loss = torch.nn.functional.mse_loss(q_values, expected_q_values)
         self.optimizer.zero_grad()
@@ -125,9 +129,9 @@ class LunarDQN(nn.Module):
     def __init__(self):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Linear(8, 256),
+            nn.Linear(8, 128),
             nn.ReLU(),
-            nn.Linear(256, 128),
+            nn.Linear(128, 128),
             nn.ReLU(),
             nn.Linear(128, 4)
         )

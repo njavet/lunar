@@ -25,11 +25,10 @@ def plot_tracker(tracker):
 
 
 def record_video(agent, env: gym.Env, seed: int, video_path: str):
-    env = RecordVideo(env, video_folder=video_path)
+    env = RecordVideo(env, video_folder=video_path, disable_logger=True)
     state, _ = env.reset(seed=seed)
     done = False
     while not done:
-        state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
         action = agent.optimal_policy(state)
         ns, reward, term, trunc, info = env.step(action)
         state = ns
