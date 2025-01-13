@@ -15,16 +15,16 @@ class Params(BaseModel):
     gamma: float = 0.99
     epsilon: float = 1.0
     epsilon_min: float = 0.01
-    max_time_steps: int = 100000
+    max_time_steps: int = 500000
     decay: float | None = None
     batch_size: int = 512
     memory_size: int = 5000000
-    update_target_steps: int = 2048
-    training_freq: int = 1
-    lr: float = 1e-4
+    update_target_steps: int = 1024
+    training_freq: int = 4
+    lr: float = 5e-4
     seed: int = 0x101
     eval_episodes: int = 10
-    model_file: Path = Path('lunar_large.pth')
+    model_file: Path = Path('lunar_large_0.pth')
     video_folder: Path = Path('videos')
     results_folder: Path = Path('results')
 
