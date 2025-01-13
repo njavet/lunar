@@ -30,8 +30,8 @@ class Agent:
         self.training_freq = training_freq
         self.lr = lr
         self.steps = 0
-        self.policy_net = LunarDQN().to(self.dev)
-        self.target_net = LunarDQN().to(self.dev)
+        self.policy_net = LargeLunarDQN().to(self.dev)
+        self.target_net = LargeLunarDQN().to(self.dev)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.lr)
 

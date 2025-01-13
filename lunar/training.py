@@ -93,7 +93,7 @@ class Tracker:
                 'total_lengths': self.total_lengths,
                 'epsilons': self.epsilons}
         df = pd.DataFrame(data)
-        df.to_csv('logs2.csv', index=False)
+        df.to_csv('logs_large0.csv', index=False)
 
     def print_logs(self, step, epsilon):
         curr_time = time.time()
