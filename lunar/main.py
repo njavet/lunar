@@ -21,7 +21,7 @@ class Params(BaseModel):
     memory_size: int = 2000000
     update_target_steps: int = 2048
     training_freq: int = 1
-    lr: float = 1e-4
+    lr: float = 1e-3
     seed: int = 0x101
     model_file: Path = Path('lunar.pth')
     video_folder: Path = Path('videos')
@@ -49,10 +49,10 @@ def main():
 
     agent = create_agent(params)
     v_envs = make_vec_env('LunarLander-v3', n_envs=params.n_envs)
-    #train_agent(agent, v_envs, params)
+    train_agent(agent, v_envs, params)
     #eval_env = gym.make('LunarLander-v3', render_mode='human')
     #evaluate_policy(agent, eval_env)
-    agent.load_model('lunar.pth')
+    #agent.load_model('lunar.pth')
 
     video_env = gym.make('LunarLander-v3', render_mode='rgb_array')
     record_video(agent, video_env, params.seed, params.video_folder)

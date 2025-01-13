@@ -76,7 +76,8 @@ class Agent:
         q_values = self.policy_net(states).gather(1, actions).squeeze()
         with torch.no_grad():
             next_q_values = self.target_net(next_states).max(1)[0]
-        expected_q_values = rewards + (self.gamma * next_q_values * (1 - dones))
+            next_q_values *= (1 - dones)
+        expected_q_values = rewards + self.gamma * next_q_values
         loss = torch.nn.functional.mse_loss(q_values, expected_q_values)
         self.optimizer.zero_grad()
         loss.backward()
