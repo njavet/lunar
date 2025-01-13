@@ -9,7 +9,7 @@ import gymnasium as gym
 
 
 def train_agent(agent, env, params):
-    tracker = Tracker(params.n_envs)
+    tracker = Tracker(params.n_envs, window_size=1000)
     states = env.reset()
     for step in range(params.max_time_steps):
         actions = agent.select_actions(states)
@@ -17,7 +17,7 @@ def train_agent(agent, env, params):
         agent.store_transitions(states, actions, rewards, next_states, dones)
         loss = agent.learn()
         states = next_states
-        tracker.update(agent.epsilon, rewards, dones, loss)
+        tracker.update(agent.epsilon, rewards, dones)
         if step % params.update_target_steps == 0:
             agent.update_target_net()
         if step % 1000 == 0:
