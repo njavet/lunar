@@ -70,6 +70,8 @@ class Agent:
         self.steps += 1
         if len(self.memory) < self.batch_size:
             return
+        if self.steps % self.training_freq != 0:
+            return
         states, actions, rewards, next_states, dones = self.memory.sample(
             self.batch_size
         )
