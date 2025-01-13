@@ -11,41 +11,40 @@ class Agent:
                  gamma: float,
                  epsilon: float,
                  epsilon_min: float,
-                 decay_proc: float,
+                 max_time_steps: int,
+                 decay: float,
                  batch_size: int,
                  memory_size: int,
                  update_target_steps: int,
                  training_freq: int,
-                 max_time_steps: int,
-                 lr: float,
-                 tol: float = 0.0001) -> None:
+                 lr: float) -> None:
         self.dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.memory = ReplayMemory(self.dev, memory_size=memory_size)
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
-        self.decay_proc = decay_proc
         self.max_time_steps = max_time_steps
+        self.decay = self.set_epsilon_decay(decay)
         self.batch_size = batch_size
         self.update_target_steps = update_target_steps
         self.training_freq = training_freq
         self.lr = lr
-        self.tol = tol
         self.steps = 0
-        self.decay_steps = self.compute_decay_steps()
         self.policy_net = LunarDQN().to(self.dev)
         self.target_net = LunarDQN().to(self.dev)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.lr)
 
-    def compute_decay_steps(self):
-        a = self.decay_proc * self.max_time_steps
-        b = np.log(self.tol) * -self.decay_proc
-        return int(a / b)
+    def load_model(self, filename):
+        self.target_net.load_state_dict(torch.load(filename))
+
+    def set_epsilon_decay(self, decay):
+        if decay is None:
+            decay = np.exp(np.log(self.epsilon_min) / self.max_time_steps)
+        return decay
 
     def epsilon_decay(self):
-        tmp = (1 - self.epsilon_min) * np.exp(-self.steps / self.decay_steps)
-        self.epsilon = self.epsilon_min + tmp
+        self.epsilon = max(self.epsilon_min, self.epsilon * self.decay)
 
     def optimal_policy(self, states):
         states = torch.tensor(states, dtype=torch.float32, device=self.dev)
@@ -77,7 +76,6 @@ class Agent:
         q_values = self.policy_net(states).gather(1, actions).squeeze()
         with torch.no_grad():
             next_q_values = self.target_net(next_states).max(1)[0]
-            next_q_values[dones] = 0.
         expected_q_values = rewards + (self.gamma * next_q_values * (1 - dones))
         loss = torch.nn.functional.mse_loss(q_values, expected_q_values)
         self.optimizer.zero_grad()

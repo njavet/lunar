@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from pathlib import Path
 
 
 class Params(BaseModel):
@@ -6,11 +7,14 @@ class Params(BaseModel):
     gamma: float = 0.99
     epsilon: float = 1.0
     epsilon_min: float = 0.01
-    decay_proc: float = 0.8
-    batch_size: int = 512
-    memory_size: int = 1000000
-    update_target_steps: int = 1024
-    training_freq: int = 1
-    lr: float = 0.001
     max_time_steps: int = 100000
-    filename: str = 'lunar.pth'
+    decay: float | None = None
+    batch_size: int = 256
+    memory_size: int = 2000000
+    update_target_steps: int = 2048
+    training_freq: int = 1
+    lr: float = 1e-4
+    seed: int = 0x101
+    model_file: Path = Path('lunar.pth')
+    video_folder: Path = Path('videos')
+    model_folder: Path = Path('models')

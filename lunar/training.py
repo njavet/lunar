@@ -25,9 +25,7 @@ def train_agent(agent, env, params):
     tracker.save_logs()
 
 
-def evaluate_policy(agent, env, filename=None):
-    if filename is not None:
-        agent.target_net.load_state_dict(torch.load(filename))
+def evaluate_policy(agent, env):
     total_reward = 0
     done = False
     state, _ = env.reset()

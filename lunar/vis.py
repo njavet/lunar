@@ -1,8 +1,11 @@
-import seaborn as sns
-import matplotlib.pyplot as plt
-import torch
+from pathlib import Path
 import gymnasium as gym
 from gymnasium.wrappers import RecordVideo
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# project imports
+from lunar.agent import Agent
 
 
 def plot_tracker(tracker):
@@ -24,8 +27,8 @@ def plot_tracker(tracker):
     plt.savefig('episodes.png')
 
 
-def record_video(agent, env: gym.Env, seed: int, video_path: str):
-    env = RecordVideo(env, video_folder=video_path, disable_logger=True)
+def record_video(agent: Agent, env: gym.Env, seed: int, video_path: Path):
+    env = RecordVideo(env, video_folder=video_path.name)
     state, _ = env.reset(seed=seed)
     done = False
     while not done:
