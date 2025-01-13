@@ -7,9 +7,9 @@ class SmallLunarDQN(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(8, 256),
             nn.ReLU(),
-            nn.Linear(256, 256),
+            nn.Linear(256, 128),
             nn.ReLU(),
-            nn.Linear(256, 4)
+            nn.Linear(128, 4)
         )
 
     def forward(self, x):
@@ -22,9 +22,7 @@ class MiddleLunarDQN(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(8, 256),
             nn.ReLU(),
-            nn.Linear(256, 512),
-            nn.ReLU(),
-            nn.Linear(512, 256),
+            nn.Linear(256, 256),
             nn.ReLU(),
             nn.Linear(256, 4),
         )
@@ -39,13 +37,11 @@ class LargeLunarDQN(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(8, 256),
             nn.ReLU(),
-            nn.Linear(256, 1024),
+            nn.Linear(256, 512),
             nn.ReLU(),
-            nn.Linear(1024, 1024),
+            nn.Linear(512, 128),
             nn.ReLU(),
-            nn.Linear(1024, 256),
-            nn.ReLU(),
-            nn.Linear(256, 4)
+            nn.Linear(128, 4)
         )
 
     def forward(self, x):

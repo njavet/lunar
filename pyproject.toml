@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-gymnasium = {extras = ["other"], version = "^1.0.0"}
+gymnasium = {extras = ["all"], version = "^1.0.0"}
 stable-baselines3 = "^2.4.1"
 pydantic = "^2.10.5"
 opencv-python = "^4.10.0.84"
@@ -15,6 +15,7 @@ rich = "^13.9.4"
 pandas = "^2.2.3"
 ipython = "^8.31.0"
 seaborn = "^0.13.2"
+pygame = "^2.6.1"
 
 
 [build-system]

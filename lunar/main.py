@@ -16,7 +16,7 @@ from lunar.agents.a2084 import G2048Agent
 from lunar.envs.g2048_env import Env2048
 
 
-def train_small_agent():
+def create_small_agent():
     params = config.get_small_lunar_params()
     agent = SmallLunarAgent(gamma=params.gamma,
                             epsilon=params.epsilon,
@@ -28,13 +28,18 @@ def train_small_agent():
                             training_freq=params.training_freq,
                             max_time_steps=params.max_time_steps,
                             lr=params.lr)
+    return agent, params
+
+
+def train_agent(agent, params):
     env = make_vec_env('LunarLander-v3', n_envs=params.n_envs)
     train_agent(agent, env, params.max_time_steps, params.n_envs)
     return agent
 
 
 def main():
-    agent = train_small_agent()
+    agent, params = create_small_agent()
+    train_agent(agent, params)
     env = gym.make('LunarLander-v3', render_mode='rgb_array')
     record_video(agent, env, 1, '.')
     evaluate_policy(agent)

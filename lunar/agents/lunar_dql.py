@@ -29,6 +29,7 @@ class SmallLunarAgent(DQNAgent):
                          max_time_steps,
                          lr)
         self.dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print('running on ', self.dev)
         self.init_dqn()
 
     def init_dqn(self):

@@ -8,7 +8,7 @@ class Params(BaseModel):
     gamma: float = 0.99
     epsilon: float = 1.0
     epsilon_min: float = 0.01
-    decay_proc: float = 0.5
+    decay_proc: float = 0.8
     batch_size: int = 512
     memory_size: int = 1e5
     update_target_steps: int = 1024
@@ -18,11 +18,11 @@ class Params(BaseModel):
 
 
 def get_small_lunar_params():
-    params = Params(n_envs=128,
+    params = Params(n_envs=32,
                     batch_size=512,
-                    memory_size=1e7,
-                    training_freq=128,
-                    max_time_steps=1e5)
+                    memory_size=1e6,
+                    training_freq=1,
+                    max_time_steps=1e6)
     return params
 
 

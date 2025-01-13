@@ -10,7 +10,7 @@ from lunar import config
 from lunar.agents.a2084 import G2048Agent
 
 
-def train_agent(agent, env, max_time_steps, n_envs, filename='lunar.pth'):
+def train_agent(agent, env, max_time_steps, n_envs, filename='lunar_nn256_env32_bs1024.pth'):
     tracker = Tracker(n_envs)
     console = Console()
     states = env.reset()
