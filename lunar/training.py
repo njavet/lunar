@@ -1,10 +1,11 @@
-import gc
 from collections import defaultdict
+import gc
 import time
 from rich.console import Console
 import torch
 import pandas as pd
 import numpy as np
+import gymnasium as gym
 
 
 def train_agent(agent, env, params):
@@ -26,16 +27,38 @@ def train_agent(agent, env, params):
     tracker.save_logs()
 
 
-def evaluate_policy(agent, env):
-    total_reward = 0
-    done = False
-    state, _ = env.reset()
-    while not done:
-        action = agent.optimal_policy(state)
-        next_state, reward, term, trunc, info = env.step(action)
-        done = term or trunc
-        state = next_state
-        total_reward += reward
+def evaluate_model(agent, n_episodes=10):
+    env = gym.make('LunarLander-v3', render_mode='rgb_array')
+    total_rewards = []
+    total_steps = []
+    landing_results = []
+    rewards_per_action = defaultdict(float)
+
+    for episode in range(n_episodes):
+        episode_reward = 0
+        steps = 0
+        state, _ = env.reset()
+        done = False
+        while not done:
+            action = agent.optimal_policy(state)
+            next_state, reward, term, trunc, infos = env.step(action)
+            episode_reward += reward
+            steps += 1
+            rewards_per_action[action] += reward
+            done = term or trunc
+            state = next_state
+        total_rewards.append(episode_reward)
+        total_steps.append(steps)
+        if episode_reward < 200:
+            # no safe landing, fail
+            landing_results.append(-1)
+        elif 200 <= episode_reward < 256:
+            # safe landing
+            landing_results.append(0)
+        else:
+            # nearly perfect landing
+            landing_results.append(1)
+    return total_rewards, total_steps, landing_results, rewards_per_action
 
 
 class Tracker:
@@ -50,7 +73,7 @@ class Tracker:
         self.total_rewards = []
         self.total_lengths = []
 
-    def update(self, epsilon, rewards, dones, loss):
+    def update(self, epsilon, rewards, dones, loss=None):
         self.episode_rewards += rewards
         self.episode_lengths += 1
 
@@ -65,12 +88,12 @@ class Tracker:
 
     def save_logs(self):
         data = {'total_rewards': self.total_rewards,
-                'mean_rewards': np.mean(self.total_rewards),
-                'std_rewards': np.std(self.total_rewards),
+                'mean_rewards': self.mean_reward,
+                'std_rewards': self.std_reward,
                 'total_lengths': self.total_lengths,
                 'epsilons': self.epsilons}
         df = pd.DataFrame(data)
-        df.to_csv('logs1.csv', index=False)
+        df.to_csv('logs2.csv', index=False)
 
     def print_logs(self, step, epsilon):
         curr_time = time.time()

@@ -6,7 +6,7 @@ from stable_baselines3.common.env_util import make_vec_env
 
 # project imports
 from lunar.agent import Agent
-from lunar.training import train_agent, evaluate_policy
+from lunar.training import train_agent, evaluate_model
 from lunar.vis import record_video
 
 
@@ -23,7 +23,8 @@ class Params(BaseModel):
     training_freq: int = 1
     lr: float = 1e-3
     seed: int = 0x101
-    model_file: Path = Path('lunar1.pth')
+    eval_episodes: int = 10
+    model_file: Path = Path('lunar2.pth')
     video_folder: Path = Path('videos')
     results_folder: Path = Path('results')
 
