@@ -1,11 +1,12 @@
-from abc import ABC
 from collections import deque
 import random
 import numpy as np
 import torch
+import torch.nn as nn
+import torch.optim as optim
 
 
-class DQNAgent(ABC):
+class Agent:
     def __init__(self,
                  gamma: float,
                  epsilon: float,
@@ -16,10 +17,10 @@ class DQNAgent(ABC):
                  update_target_steps: int,
                  training_freq: int,
                  max_time_steps: int,
-                 lr: float) -> None:
+                 lr: float,
+                 tol: float = 0.0001) -> None:
         self.dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.memory = ReplayMemory(self.dev, memory_size=memory_size)
-        # self.memory = ReplayMemoryGPU(self.dev, memory_size=memory_size, state_shape=(8,))
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
@@ -30,19 +31,16 @@ class DQNAgent(ABC):
         self.update_target_steps = update_target_steps
         self.training_freq = training_freq
         self.lr = lr
-        self.policy_net = None
-        self.target_net = None
-        self.optimizer = None
-        self.init_dqn()
+        self.tol = tol
+        self.policy_net = LunarDQN().to(self.dev)
+        self.target_net = LunarDQN().to(self.dev)
+        self.target_net.load_state_dict(self.policy_net.state_dict())
+        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.lr)
         self.steps = 0
 
-    def init_dqn(self):
-        raise NotImplementedError
-
     def compute_decay_steps(self):
-        tol = 0.0001
         a = self.decay_proc * self.max_time_steps
-        b = np.log(tol) * -self.decay_proc
+        b = np.log(self.tol) * -self.decay_proc
         return int(a / b)
 
     def epsilon_decay(self):
@@ -58,7 +56,8 @@ class DQNAgent(ABC):
 
     def select_actions(self, states):
         if random.random() < self.epsilon:
-            return torch.randint(0, 4, (len(states),), device=self.dev).cpu().numpy()
+            action = torch.randint(0, 4, (len(states),), device=self.dev)
+            return action.cpu().numpy()
         states = torch.tensor(states, dtype=torch.float32, device=self.dev)
         with torch.no_grad():
             q_values = self.policy_net(states)
@@ -69,11 +68,10 @@ class DQNAgent(ABC):
         self.steps += 1
         if len(self.memory) < self.batch_size:
             return
-        states, actions, rewards, next_states, dones = self.memory.sample(self.batch_size)
+        states, actions, rewards, next_states, dones = self.memory.sample(
+            self.batch_size
+        )
         q_values = self.policy_net(states).gather(1, actions).squeeze()
-        # GPU
-        #q_values = self.policy_net(states).gather(1, actions.unsqueeze(1)).squeeze(1)
-
         with torch.no_grad():
             next_q_values = self.target_net(next_states).max(1)[0]
         expected_q_values = rewards + (self.gamma * next_q_values * (1 - dones))
@@ -123,47 +121,16 @@ class ReplayMemory:
         return len(self.memory)
 
 
-class ReplayMemoryGPU:
-    def __init__(self, device: torch.device, memory_size: int, state_shape: tuple):
-        self.device = device
-        self.capacity = memory_size
-        self.index = 0
-        self.full = False
-
-        # Pre-allocate memory on GPU
-        self.states = torch.zeros((memory_size, *state_shape), dtype=torch.float32, device=self.device)
-        self.actions = torch.zeros(memory_size, 1, dtype=torch.long, device=self.device)
-        self.rewards = torch.zeros(memory_size, 1, dtype=torch.float32, device=self.device)
-        self.next_states = torch.zeros((memory_size, *state_shape), dtype=torch.float32, device=self.device)
-        self.dones = torch.zeros(memory_size, 1, dtype=torch.float32, device=self.device)
-
-    def push(self, states, actions, rewards, next_states, dones):
-        size = len(states)
-        if self.capacity < self.index + size:
-            self.full = True
-            self.index = 0
-            end = size
-        else:
-            end = self.index + size
-
-        self.states[self.index:end] = torch.tensor(states, device=self.device)
-        self.actions[self.index:end] = torch.tensor(actions, device=self.device).unsqueeze(1)
-        self.rewards[self.index:end] = torch.tensor(rewards, device=self.device).unsqueeze(1)
-        self.next_states[self.index:end] = torch.tensor(next_states, device=self.device)
-        self.dones[self.index:end] = torch.tensor(dones, device=self.device).unsqueeze(1)
-
-        self.index = end
-
-    def sample(self, batch_size):
-        max_idx = self.capacity if self.full else self.index
-        indices = torch.randint(0, max_idx, (batch_size,), device=self.device)
-        return (
-            self.states[indices],
-            self.actions[indices].squeeze(1),
-            self.rewards[indices].squeeze(1),
-            self.next_states[indices],
-            self.dones[indices].squeeze(1)
+class LunarDQN(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(8, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, 4)
         )
 
-    def __len__(self):
-        return self.capacity if self.full else self.index
+    def forward(self, x):
+        return self.net(x)

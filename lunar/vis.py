@@ -34,5 +34,4 @@ def record_video(agent, env: gym.Env, seed: int, video_path: str):
         ns, reward, term, trunc, info = env.step(action)
         state = ns
         done = term or trunc
-
     env.close()
