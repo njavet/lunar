@@ -51,9 +51,10 @@ def main():
     agent = create_agent(params)
     v_envs = make_vec_env('LunarLander-v3', n_envs=params.n_envs)
     train_agent(agent, v_envs, params)
-    #eval_env = gym.make('LunarLander-v3', render_mode='human')
-    #evaluate_policy(agent, eval_env)
+
+    eval_env = gym.make('LunarLander-v3', render_mode='rgb_array')
     #agent.load_model('lunar.pth')
+    evaluate_model(agent)
 
     video_env = gym.make('LunarLander-v3', render_mode='rgb_array')
     record_video(agent, video_env, params.seed, params.video_folder)
