@@ -15,7 +15,7 @@ class Params(BaseModel):
     gamma: float = 0.97
     epsilon: float = 1.0
     epsilon_min: float = 0.01
-    max_time_steps: int = 500000
+    max_time_steps: int = 1000000
     decay: float | None = None
     batch_size: int = 512
     memory_size: int = 5000000
@@ -24,7 +24,7 @@ class Params(BaseModel):
     lr: float = 5e-4
     seed: int = 0x101
     eval_episodes: int = 10
-    model_file: Path = Path('lunar_large_1_rnorm_new.pth')
+    model_file: Path = Path('final_lunar_large_1_rnorm_new.pth')
     video_folder: Path = Path('videos')
     results_folder: Path = Path('results')
 

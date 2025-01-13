@@ -97,7 +97,7 @@ class Tracker:
                 'mean_lengths': self.mean_lengths,
                 'epsilons': self.epsilons}
         df = pd.DataFrame(data)
-        df.to_csv('logs_large_0_rnorm_new.csv', index=False)
+        df.to_csv('final_logs_large_0_rnorm_new.csv', index=False)
 
     def print_logs(self, step, epsilon):
         curr_time = time.time()
