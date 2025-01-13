@@ -24,7 +24,8 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 train = "lunar.main:train_small_agent"
-eval = "lunar.training:evaluate_policy"
+eval = "lunar.main:create_evaluator"
 t0 = "lunar.main:train_2048_agent"
 main = "lunar.main:main"
+video = "lunar.main:create_video"
 

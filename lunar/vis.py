@@ -31,9 +31,12 @@ def record_video(agent: Agent, env: gym.Env, seed: int, video_path: Path):
     env = RecordVideo(env, video_folder=video_path.name)
     state, _ = env.reset(seed=seed)
     done = False
+    tot = 0
     while not done:
         action = agent.optimal_policy(state)
         ns, reward, term, trunc, info = env.step(action)
+        tot += reward
         state = ns
         done = term or trunc
+    print('tot', tot)
     env.close()

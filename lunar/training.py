@@ -33,6 +33,7 @@ def evaluate_model(agent, n_episodes=10):
     total_steps = []
     landing_results = []
     rewards_per_action = defaultdict(float)
+    action_count = defaultdict(int)
 
     for episode in range(n_episodes):
         episode_reward = 0
@@ -44,7 +45,8 @@ def evaluate_model(agent, n_episodes=10):
             next_state, reward, term, trunc, infos = env.step(action)
             episode_reward += reward
             steps += 1
-            rewards_per_action[action] += reward
+            rewards_per_action[action.item()] += reward
+            action_count[action.item()] += 1
             done = term or trunc
             state = next_state
         total_rewards.append(episode_reward)
@@ -52,12 +54,16 @@ def evaluate_model(agent, n_episodes=10):
         if episode_reward < 200:
             # no safe landing, fail
             landing_results.append(-1)
-        elif 200 <= episode_reward < 256:
+        elif 200 <= episode_reward < 299:
             # safe landing
             landing_results.append(0)
         else:
             # nearly perfect landing
             landing_results.append(1)
+
+    for action, count in action_count.items():
+        rewards_per_action[action] /= count
+
     return total_rewards, total_steps, landing_results, rewards_per_action
 
 
