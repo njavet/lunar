@@ -62,18 +62,21 @@ def evaluate_model(agent, n_episodes=10):
 
 
 class Tracker:
-    def __init__(self, n_envs):
+    def __init__(self, n_envs, window_size):
         self.console = Console()
         self.start_t = time.time()
+        self.window_size = window_size
         self.n_envs = n_envs
         self.episode_rewards = np.zeros(n_envs)
         self.episode_lengths = np.zeros(n_envs)
-        self.losses = []
+
         self.epsilons = []
         self.total_rewards = []
         self.total_lengths = []
+        self.mean_rewards = []
+        self.mean_lengths = []
 
-    def update(self, epsilon, rewards, dones, loss=None):
+    def update(self, epsilon, rewards, dones):
         self.episode_rewards += rewards
         self.episode_lengths += 1
 
@@ -82,18 +85,19 @@ class Tracker:
                 self.total_rewards.append(self.episode_rewards[i])
                 self.total_lengths.append(self.episode_lengths[i])
                 self.epsilons.append(epsilon)
-                self.losses.append(loss)
                 self.episode_rewards[i] = 0
                 self.episode_lengths[i] = 0
+                self.mean_rewards.append(np.mean(self.total_rewards))
+                self.mean_lengths.append(np.mean(self.total_lengths))
 
     def save_logs(self):
         data = {'total_rewards': self.total_rewards,
-                'mean_rewards': self.mean_reward,
-                'std_rewards': self.std_reward,
+                'mean_rewards': self.mean_rewards,
                 'total_lengths': self.total_lengths,
+                'mean_lengths': self.mean_lengths,
                 'epsilons': self.epsilons}
         df = pd.DataFrame(data)
-        df.to_csv('logs_large_0.csv', index=False)
+        df.to_csv('logs_large_0_rnorm_new.csv', index=False)
 
     def print_logs(self, step, epsilon):
         curr_time = time.time()
@@ -109,12 +113,12 @@ class Tracker:
 
     @property
     def mean_reward(self):
-        return int(np.mean(self.total_rewards) if self.total_rewards else 0)
+        return np.mean(self.total_rewards[-self.window_size:])
 
     @property
     def mean_length(self):
-        return int(np.mean(self.total_lengths) if self.total_lengths else 0)
+        return np.mean(self.total_lengths[-self.window_size:])
 
     @property
     def std_reward(self):
-        return int(np.std(self.total_rewards) if self.total_rewards else 0)
+        return np.std(self.total_rewards[-self.window_size:])

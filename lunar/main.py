@@ -12,7 +12,7 @@ from lunar.vis import record_video
 
 class Params(BaseModel):
     n_envs: int = 32
-    gamma: float = 0.98
+    gamma: float = 0.97
     epsilon: float = 1.0
     epsilon_min: float = 0.01
     max_time_steps: int = 500000
@@ -24,7 +24,7 @@ class Params(BaseModel):
     lr: float = 5e-4
     seed: int = 0x101
     eval_episodes: int = 10
-    model_file: Path = Path('lunar_large_0.pth')
+    model_file: Path = Path('lunar_large_1_rnorm_new.pth')
     video_folder: Path = Path('videos')
     results_folder: Path = Path('results')
 
