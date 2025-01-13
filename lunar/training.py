@@ -1,4 +1,5 @@
 import gc
+from collections import defaultdict
 import time
 from rich.console import Console
 import torch
@@ -13,9 +14,9 @@ def train_agent(agent, env, params):
         actions = agent.select_actions(states)
         next_states, rewards, dones, infos = env.step(actions)
         agent.store_transitions(states, actions, rewards, next_states, dones)
-        agent.learn()
+        loss = agent.learn()
         states = next_states
-        tracker.update(agent.epsilon, rewards, dones, infos)
+        tracker.update(agent.epsilon, rewards, dones, loss)
         if step % params.update_target_steps == 0:
             agent.update_target_net()
         if step % 1000 == 0:
@@ -38,18 +39,18 @@ def evaluate_policy(agent, env):
 
 
 class Tracker:
-    def __init__(self, num_envs):
+    def __init__(self, n_envs):
         self.console = Console()
         self.start_t = time.time()
-        self.num_envs = num_envs
-        self.episode_rewards = np.zeros(num_envs)
-        self.episode_lengths = np.zeros(num_envs)
+        self.n_envs = n_envs
+        self.episode_rewards = np.zeros(n_envs)
+        self.episode_lengths = np.zeros(n_envs)
+        self.losses = []
         self.epsilons = []
         self.total_rewards = []
         self.total_lengths = []
 
-    def update(self, epsilon, rewards, dones, infos):
-        self.epsilons.append(epsilon)
+    def update(self, epsilon, rewards, dones, loss):
         self.episode_rewards += rewards
         self.episode_lengths += 1
 
@@ -57,6 +58,8 @@ class Tracker:
             if done:
                 self.total_rewards.append(self.episode_rewards[i])
                 self.total_lengths.append(self.episode_lengths[i])
+                self.epsilons.append(epsilon)
+                self.losses.append(loss)
                 self.episode_rewards[i] = 0
                 self.episode_lengths[i] = 0
 

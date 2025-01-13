@@ -85,6 +85,7 @@ class Agent:
         loss.backward()
         self.optimizer.step()
         self.epsilon_decay()
+        return loss.item()
 
     def store_transitions(self, states, actions, rewards, next_states, dones):
         self.memory.push(states, actions, rewards, next_states, dones)

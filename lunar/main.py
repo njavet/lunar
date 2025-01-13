@@ -17,9 +17,9 @@ class Params(BaseModel):
     epsilon_min: float = 0.01
     max_time_steps: int = 100000
     decay: float | None = None
-    batch_size: int = 256
-    memory_size: int = 2000000
-    update_target_steps: int = 2048
+    batch_size: int = 128
+    memory_size: int = 100000
+    update_target_steps: int = 1024
     training_freq: int = 1
     lr: float = 1e-3
     seed: int = 0x101
