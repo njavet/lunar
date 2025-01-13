@@ -11,11 +11,11 @@ from lunar.vis import record_video
 
 
 class Params(BaseModel):
-    n_envs: int = 32
+    n_envs: int = 16
     gamma: float = 0.99
     epsilon: float = 1.0
     epsilon_min: float = 0.01
-    max_time_steps: int = 100000
+    max_time_steps: int = 64000
     decay: float | None = None
     batch_size: int = 128
     memory_size: int = 100000

@@ -21,8 +21,8 @@ def train_agent(agent, env, params):
             agent.update_target_net()
         if step % 1000 == 0:
             gc.collect()
-            tracker.print_logs(step)
-    torch.save(agent.target_net.state_dict(), params.filename)
+            tracker.print_logs(step, agent.epsilon)
+    torch.save(agent.target_net.state_dict(), params.model_file)
     tracker.save_logs()
 
 
@@ -64,20 +64,21 @@ class Tracker:
                 self.episode_lengths[i] = 0
 
     def save_logs(self):
-        df0 = pd.DataFrame({'total_rewards': self.total_rewards})
-        df1 = pd.DataFrame({'total_lengths': self.total_lengths})
-        df2 = pd.DataFrame({'epsilons': self.epsilons})
-        df0.to_csv('total_rewards.csv')
-        df1.to_csv('total_length.csv')
-        df2.to_csv('epsilons.csv')
+        data = {'total_rewards': self.total_rewards,
+                'mean_rewards': np.mean(self.total_rewards),
+                'std_rewards': np.std(self.total_rewards),
+                'total_lengths': self.total_lengths,
+                'epsilons': self.epsilons}
+        df = pd.DataFrame(data)
+        df.to_csv('logs.csv', index=False)
 
-    def print_logs(self, step):
+    def print_logs(self, step, epsilon):
         curr_time = time.time()
         diff_time = (curr_time - self.start_t) / 60
         self.console.print(64 * '-', style='blue')
         self.console.print(f'Total Time: {diff_time:.2f} minutes...')
         self.console.print(f'steps: {step} / episodes: {len(self.total_lengths)}')
-        self.console.print(f'current epsilon: {self.epsilons[-1]:.4f}',
+        self.console.print(f'current epsilon: {epsilon:.4f}',
                            style='#6312ff')
         self.console.print(f'mean reward: {self.mean_reward}')
         self.console.print(f'std reward: {self.std_reward}')
