@@ -12,7 +12,7 @@ from lunar.vis import record_video
 
 class Params(BaseModel):
     n_envs: int = 32
-    gamma: float = 0.99
+    gamma: float = 0.98
     epsilon: float = 1.0
     epsilon_min: float = 0.01
     max_time_steps: int = 500000

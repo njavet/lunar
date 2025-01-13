@@ -34,6 +34,7 @@ class Agent:
         self.target_net = LargeLunarDQN().to(self.dev)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.lr)
+        self.reward_normalizer = RewardNormalizer()
 
     def load_model(self, filename):
         self.target_net.load_state_dict(torch.load(filename))
@@ -88,7 +89,10 @@ class Agent:
         return loss.item()
 
     def store_transitions(self, states, actions, rewards, next_states, dones):
-        self.memory.push(states, actions, rewards, next_states, dones)
+        normalized_rewards = [self.reward_normalizer.normalize(r) for r in rewards]
+        for r in rewards:
+            self.reward_normalizer.update(r)
+        self.memory.push(states, actions, normalized_rewards, next_states, dones)
 
     def update_target_net(self):
         self.target_net.load_state_dict(self.policy_net.state_dict())
@@ -157,3 +161,20 @@ class LargeLunarDQN(nn.Module):
 
     def forward(self, x):
         return self.net(x)
+
+
+class RewardNormalizer:
+    def __init__(self):
+        self.mean = 0.0
+        self.var = 0.0
+        self.count = 1e-4
+
+    def update(self, reward):
+        self.count += 1
+        delta = reward - self.mean
+        self.mean += delta / self.count
+        self.var += delta * (reward - self.mean)
+
+    def normalize(self, reward):
+        std = (self.var / self.count) ** 0.5
+        return (reward - self.mean) / (std + 1e-8)
