@@ -1,12 +1,31 @@
-import gymnasium as gym
+from pathlib import Path
 import os
+from pydantic import BaseModel
+import gymnasium as gym
 from stable_baselines3.common.env_util import make_vec_env
 
 # project imports
-from lunar.config import Params
 from lunar.agent import Agent
 from lunar.training import train_agent, evaluate_policy
 from lunar.vis import record_video
+
+
+class Params(BaseModel):
+    n_envs: int = 32
+    gamma: float = 0.99
+    epsilon: float = 1.0
+    epsilon_min: float = 0.01
+    max_time_steps: int = 100000
+    decay: float | None = None
+    batch_size: int = 256
+    memory_size: int = 2000000
+    update_target_steps: int = 2048
+    training_freq: int = 1
+    lr: float = 1e-4
+    seed: int = 0x101
+    model_file: Path = Path('lunar.pth')
+    video_folder: Path = Path('videos')
+    results_folder: Path = Path('results')
 
 
 def create_agent(params):
@@ -26,7 +45,7 @@ def create_agent(params):
 def main():
     params = Params()
     os.makedirs(params.video_folder, exist_ok=True)
-    os.makedirs(params.model_folder, exist_ok=True)
+    os.makedirs(params.results_folder, exist_ok=True)
 
     agent = create_agent(params)
     v_envs = make_vec_env('LunarLander-v3', n_envs=params.n_envs)
