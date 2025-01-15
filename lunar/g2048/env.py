@@ -5,8 +5,8 @@ import numpy as np
 import pygame
 
 # project imports
-from rla2048.core import state
-from rla2048 import config
+from lunar.g2048 import state
+from lunar import config
 
 
 class Env2048(gym.Env):
@@ -19,7 +19,6 @@ class Env2048(gym.Env):
         self.action_space = Discrete(4)
         self.board = np.zeros((4, 4))
         self.score = 0
-        self.max_tile = 0
         self.window_size = 512
         self.window = None
         self.clock = None
@@ -29,11 +28,11 @@ class Env2048(gym.Env):
         return state.board_to_state(self.board)
 
     def get_info(self):
-        return {'score': self.score, 'max_tile': self.max_tile}
+        return {'score': self.score,
+                'tiles': dict(zip(*np.unique(self.board, return_counts=True)))}
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self.max_tile = 0
         self.board = np.zeros((4, 4), dtype=np.int64)
         self.score = 0
         self.board = state.add_random_tile(self.board)
@@ -53,7 +52,6 @@ class Env2048(gym.Env):
 
         if not np.array_equal(self.board, new_board):
             self.board = state.add_random_tile(new_board)
-            self.max_tile = np.max(self.board)
             # in_corner = np.any(self.corners == self.max_tile)
             # zeros = 16 - np.count_nonzero(self.board)
             reward = score + 1

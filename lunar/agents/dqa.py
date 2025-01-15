@@ -23,7 +23,7 @@ class DQNAgent:
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
         self.max_time_steps = max_time_steps
-        self.decay = self.set_epsilon_decay(decay)
+        self.decay = decay
         self.batch_size = batch_size
         self.update_target_steps = update_target_steps
         self.training_freq = training_freq
@@ -42,11 +42,6 @@ class DQNAgent:
 
     def load_model(self, filename):
         self.target_net.load_state_dict(torch.load(filename))
-
-    def set_epsilon_decay(self, decay):
-        if decay is None:
-            decay = np.exp(np.log(self.epsilon_min) / self.max_time_steps)
-        return decay
 
     def epsilon_decay(self):
         self.epsilon = max(self.epsilon_min, self.epsilon * self.decay)

@@ -12,6 +12,7 @@ class Params(BaseModel):
     batch_size: int
     memory_size: int
     update_target_steps: int
+    checkpoint_steps: int
     training_freq: int
     lr: float
     seed: int

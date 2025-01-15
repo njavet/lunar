@@ -5,10 +5,9 @@ from rich.console import Console
 import torch
 import pandas as pd
 import numpy as np
-import gymnasium as gym
 
 
-def train_agent(agent, env, params):
+def train_dqa(agent, env, params):
     tracker = Tracker(params.n_envs, window_size=1000)
     states = env.reset()
     for step in range(params.max_time_steps):
@@ -17,18 +16,17 @@ def train_agent(agent, env, params):
         agent.store_transitions(states, actions, rewards, next_states, dones)
         agent.learn()
         states = next_states
-        tracker.update(agent.epsilon, rewards, dones)
+        tracker.update(agent.epsilon, rewards, dones, infos)
         if step % params.update_target_steps == 0:
             agent.update_target_net()
         if step % 1000 == 0:
             gc.collect()
-            tracker.print_logs(step, agent.epsilon)
+            tracker.print_logs(step, agent.epsilon, infos)
     torch.save(agent.target_net.state_dict(), params.model_file)
     tracker.save_logs()
 
 
-def evaluate_model(agent, n_episodes=10):
-    env = gym.make('LunarLander-v3', render_mode='rgb_array')
+def evaluate_model(agent, env, n_episodes=10):
     total_rewards = []
     total_steps = []
     rewards_per_action = defaultdict(float)
@@ -81,6 +79,7 @@ class Tracker:
         self.n_envs = n_envs
         self.episode_rewards = np.zeros(n_envs)
         self.episode_lengths = np.zeros(n_envs)
+        self.tiles = defaultdict(int)
 
         self.epsilons = []
         self.total_rewards = []
@@ -88,9 +87,13 @@ class Tracker:
         self.mean_rewards = []
         self.mean_lengths = []
 
-    def update(self, epsilon, rewards, dones):
+    def update(self, epsilon, rewards, dones, infos):
         self.episode_rewards += rewards
         self.episode_lengths += 1
+        for info in infos:
+            for tile, count in info['tiles'].items():
+                self.tiles[tile] += count
+        self.tiles = {k: v / self.n_envs for k, v in self.tiles.items()}
 
         for i, done in enumerate(dones):
             if done:
@@ -109,9 +112,9 @@ class Tracker:
                 'mean_lengths': self.mean_lengths,
                 'epsilons': self.epsilons}
         df = pd.DataFrame(data)
-        df.to_csv('final_logs_large_0_rnorm_new.csv', index=False)
+        df.to_csv('logs.csv', index=False)
 
-    def print_logs(self, step, epsilon):
+    def print_logs(self, step, epsilon, infos):
         curr_time = time.time()
         diff_time = (curr_time - self.start_t) / 60
         self.console.print(64 * '-', style='blue')
@@ -122,6 +125,7 @@ class Tracker:
         self.console.print(f'mean reward: {self.mean_reward}')
         self.console.print(f'std reward: {self.std_reward}')
         self.console.print(f'mean length: {self.mean_length}')
+        self.console.print(f'tiles: {self.tiles}')
 
     @property
     def mean_reward(self):

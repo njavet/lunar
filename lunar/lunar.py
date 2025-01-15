@@ -56,8 +56,19 @@ def create_agent(params):
     return agent
 
 
+def evaluation(model_file='models/lunar_small_g99.pth'):
+    params = Params()
+    agent = create_agent(params)
+    agent.load_model(model_file)
+    tr, ts, lr, rpa = evaluate_model(agent)
+    plot_evaluation(tr, ts, lr, rpa)
+    return tr, ts, lr, rp
+
+
 def lunar():
     params = get_params()
     agent = create_agent(params)
     agent.init_dqn(LargeLunarDQN)
 
+    v_envs = make_vec_env('LunarLander-v3', n_envs=params.n_envs)
+    train_agent(agent, v_envs, params)

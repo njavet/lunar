@@ -1,4 +1,4 @@
-from .env import Env2048
+from .g2048.env import Env2048
 from gymnasium.envs.registration import register
 
 register(
