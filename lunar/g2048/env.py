@@ -33,10 +33,10 @@ class Env2048(gym.Env):
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self.board.fill(0)
+        self.board = np.zeros((4, 4))
         self.score = 0
-        state.add_random_tile(self.board)
-        state.add_random_tile(self.board)
+        self.board = state.add_random_tile(self.board)
+        self.board = state.add_random_tile(self.board)
         observation = self.get_obs()
         info = {'score': 0, 'tiles': {}}
 
@@ -47,11 +47,11 @@ class Env2048(gym.Env):
 
     def step(self, action):
         new_board = state.execute_action(self.board, action)
-        score = state.get_score(self.board, new_board)
-        self.score += score
 
         if not np.array_equal(self.board, new_board):
-            state.add_random_tile(new_board)
+            score = state.get_score(self.board, new_board)
+            self.board = state.add_random_tile(new_board)
+            self.score += score
             # in_corner = np.any(self.corners == self.max_tile)
             # zeros = 16 - np.count_nonzero(self.board)
             reward = score + 1

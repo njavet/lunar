@@ -10,16 +10,17 @@ class Actions(Enum):
     up = 3
 
 
-def state_to_board(state: np.ndarray, board: np.ndarray):
-    board.fill(0)
+def state_to_board(state: np.ndarray) -> np.ndarray:
+    board = np.zeros((4, 4), dtype=np.uint16)
     one_hots, rs, cs = np.where(state != 0)
     values = np.exp2(one_hots).astype(np.uint16)
     board[rs, cs] = values
+    return board
 
 
 def board_to_state(board: np.ndarray) -> np.ndarray:
     # TODO move back to log-1 (since the first grid is always zero)
-    state = np.zeros((16, 4, 4), dtype=np.float32)
+    state = np.zeros((16, 4, 4), dtype=np.uint8)
     rs, cs = np.where(board != 0)
     one_hot = np.log2(board[rs, cs]).astype(np.uint8)
     state[one_hot, rs, cs] = 1
@@ -100,8 +101,8 @@ def game_over(board: np.ndarray) -> bool:
     return True
 
 
-def add_random_tile(board):
-    empty_cells = np.argwhere(board == 0)
-    if empty_cells.size > 0:
-        row, col = empty_cells[np.random.randint(len(empty_cells))]
-        board[row, col] = np.random.choice([2, 4], p=[0.9, 0.1])
+def add_random_tile(board: np.ndarray) -> np.ndarray:
+    r, c = random.choice(np.argwhere(board == 0))
+    new_board = board.copy()
+    new_board[r, c] = 2 if random.random() < 0.9 else 4
+    return new_board
