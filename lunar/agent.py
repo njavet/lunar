@@ -86,7 +86,6 @@ class Agent:
         loss.backward()
         self.optimizer.step()
         self.epsilon_decay()
-        return loss.item()
 
     def normalize_rewards(self, rewards):
         normalized_rewards = [self.reward_normalizer.normalize(r) for r in rewards]
