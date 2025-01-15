@@ -11,37 +11,6 @@ from lunar.training import train_agent, evaluate_model
 from lunar.vis import record_video, plot_evaluation
 
 
-class Params(BaseModel):
-    n_envs: int = 32
-    gamma: float = 0.97
-    epsilon: float = 1.0
-    epsilon_min: float = 0.01
-    max_time_steps: int = 500000
-    decay: float | None = None
-    batch_size: int = 512
-    memory_size: int = 5000000
-    update_target_steps: int = 1024
-    training_freq: int = 1
-    lr: float = 5e-4
-    seed: int = 0x101
-    eval_episodes: int = 10
-    model_file: Path = Path('lunar.pth')
-    video_folder: Path = Path('videos')
-    results_folder: Path = Path('logs')
-
-
-def create_agent(params):
-    agent = Agent(gamma=params.gamma,
-                  epsilon=params.epsilon,
-                  epsilon_min=params.epsilon_min,
-                  max_time_steps=params.max_time_steps,
-                  decay=params.decay,
-                  batch_size=params.batch_size,
-                  memory_size=params.memory_size,
-                  update_target_steps=params.update_target_steps,
-                  training_freq=params.training_freq,
-                  lr=params.lr)
-    return agent
 
 
 def create_video(model_file='models/lunar_small_g99.pth'):

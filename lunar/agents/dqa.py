@@ -2,11 +2,10 @@ from collections import deque
 import random
 import numpy as np
 import torch
-import torch.nn as nn
 import torch.optim as optim
 
 
-class Agent:
+class DQNAgent:
     def __init__(self,
                  gamma: float,
                  epsilon: float,
