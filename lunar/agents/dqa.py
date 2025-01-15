@@ -52,6 +52,7 @@ class DQNAgent:
             'optim_state_dict': self.optimizer.state_dict(),
             'steps': self.steps,
             'epsilon': self.epsilon,
+            'memory': self.memory.memory,
         }, 'checkpoint.pth')
 
     def load_checkpoint(self):
@@ -62,6 +63,7 @@ class DQNAgent:
             self.steps = checkpoint['steps'] + 1
             self.target_net.load_state_dict(self.policy_net.state_dict())
             self.epsilon = checkpoint['epsilon']
+            self.memory.memory = checkpoint.get('memory', deque(maxlen=self.memory.memory.maxlen))
             print('checkpoint loaded...')
         except FileNotFoundError:
             print('no checkpoint found ...')
