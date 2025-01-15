@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 class Params(BaseModel):
-    n_envs: int = 256
+    n_envs: int = 128
     gamma: float = 1.0
     epsilon: float = 1.0
     epsilon_min: float = 0.01

@@ -14,6 +14,7 @@ def train_agent(agent, env, params):
         actions = agent.select_actions(states)
         next_states, rewards, dones, infos = env.step(actions)
         agent.store_transitions(states, actions, rewards, next_states, dones)
+        agent.learn()
         states = next_states
         tracker.update(agent.epsilon, rewards, dones)
         if step % params.update_target_steps == 0:

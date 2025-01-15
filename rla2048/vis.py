@@ -7,7 +7,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # project imports
-from lunar.agent import Agent
+from rla2048.agent import Agent
 
 
 def plot_evaluation(rewards, steps, landings, rewards_per_action):
