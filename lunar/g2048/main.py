@@ -1,5 +1,5 @@
 from selenium.webdriver.common.by import By
-from stable_baselines3.common.vec_env import SubprocVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv, VecMonitor
 import time
 import numpy as np
 from pathlib import Path
@@ -88,4 +88,5 @@ def main():
     agent = create_agent(params)
     agent.init_dqn(ConNet)
     env = SubprocVecEnv([lambda: Env2048() for _ in range(params.n_envs)])
+    env = VecMonitor(env)
     train_dqa(agent, env, params)
