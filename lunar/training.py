@@ -81,7 +81,6 @@ class Tracker:
         self.start_t = time.time()
         self.window_size = window_size
         self.n_envs = n_envs
-        self.completed_games = np.ones(n_envs)
         self.episode_rewards = np.zeros(n_envs)
         self.episode_lengths = np.zeros(n_envs)
         self.tiles_devel = []
@@ -116,7 +115,7 @@ class Tracker:
 
     def print_tiles(self):
         for tile, count in self.tiles.items():
-            avg_count = count / self.completed_games
+            avg_count = count / self.episode_lengths
             tile_str = str(tile).rjust(5)
             count_str = str(count).rjust(8)
             self.console.print(f'{tile_str}: {count_str} / {avg_count:.4f}')
@@ -125,12 +124,11 @@ class Tracker:
         self.episode_rewards += rewards
         self.episode_lengths += 1
         self.update_tiles(infos)
-        tiles = {k: v / self.completed_games for k, v in self.tiles.items()}
+        tiles = {k: v / self.episode_lengths for k, v in self.tiles.items()}
         self.tiles_devel.append(tiles)
 
         for i, done in enumerate(dones):
             if done:
-                self.completed_games[i] += 1
                 self.total_rewards.append(self.episode_rewards[i])
                 self.total_lengths.append(self.episode_lengths[i])
                 self.epsilons.append(epsilon)
@@ -161,7 +159,6 @@ class Tracker:
         self.console.print(f'mean reward: {self.mean_reward:.2f}')
         self.console.print(f'std reward: {self.std_reward:.2f}')
         self.console.print(f'mean length: {self.mean_length:.2f}')
-        self.console.print(f'completed games: {self.completed_games}')
         self.print_tiles()
 
     @property
