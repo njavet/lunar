@@ -88,11 +88,15 @@ class Agent:
         self.epsilon_decay()
         return loss.item()
 
-    def store_transitions(self, states, actions, rewards, next_states, dones):
+    def normalize_rewards(self, rewards):
         normalized_rewards = [self.reward_normalizer.normalize(r) for r in rewards]
         for r in rewards:
             self.reward_normalizer.update(r)
-        self.memory.push(states, actions, normalized_rewards, next_states, dones)
+        return normalized_rewards
+
+    def store_transitions(self, states, actions, rewards, next_states, dones):
+        normalized_rewards = self.normalize_rewards(rewards)
+        self.memory.push(states, actions, rewards, next_states, dones)
 
     def update_target_net(self):
         self.target_net.load_state_dict(self.policy_net.state_dict())

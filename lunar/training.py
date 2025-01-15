@@ -15,7 +15,6 @@ def train_agent(agent, env, params):
         actions = agent.select_actions(states)
         next_states, rewards, dones, infos = env.step(actions)
         agent.store_transitions(states, actions, rewards, next_states, dones)
-        loss = agent.learn()
         states = next_states
         tracker.update(agent.epsilon, rewards, dones)
         if step % params.update_target_steps == 0:
@@ -31,9 +30,12 @@ def evaluate_model(agent, n_episodes=10):
     env = gym.make('LunarLander-v3', render_mode='rgb_array')
     total_rewards = []
     total_steps = []
-    landing_results = []
     rewards_per_action = defaultdict(float)
     action_count = defaultdict(int)
+    landing_results = {'crashed': 0,
+                       'failed': 0,
+                       'landed': 0,
+                       'perfect': 0}
 
     for episode in range(n_episodes):
         episode_reward = 0
@@ -45,21 +47,24 @@ def evaluate_model(agent, n_episodes=10):
             next_state, reward, term, trunc, infos = env.step(action)
             episode_reward += reward
             steps += 1
-            rewards_per_action[action.item()] += reward
-            action_count[action.item()] += 1
             done = term or trunc
             state = next_state
+
+            # collecting infos
+            rewards_per_action[action.item()] += reward
+            action_count[action.item()] += 1
+
+        # collecting infos
         total_rewards.append(episode_reward)
         total_steps.append(steps)
-        if episode_reward < 200:
-            # no safe landing, fail
-            landing_results.append(-1)
+        if episode_reward < 0:
+            landing_results['crashed'] += 1
+        elif episode_reward < 200:
+            landing_results['failed'] += 1
         elif 200 <= episode_reward < 299:
-            # safe landing
-            landing_results.append(0)
+            landing_results['landed'] += 1
         else:
-            # nearly perfect landing
-            landing_results.append(1)
+            landing_results['perfect'] += 1
 
     for action, count in action_count.items():
         rewards_per_action[action] /= count

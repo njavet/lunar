@@ -8,7 +8,7 @@ from stable_baselines3.common.env_util import make_vec_env
 # project imports
 from lunar.agent import Agent
 from lunar.training import train_agent, evaluate_model
-from lunar.vis import record_video
+from lunar.vis import record_video, plot_evaluation
 
 
 class Params(BaseModel):
@@ -25,9 +25,9 @@ class Params(BaseModel):
     lr: float = 5e-4
     seed: int = 0x101
     eval_episodes: int = 10
-    model_file: Path = Path('final_lunar_large_1_rnorm_new.pth')
+    model_file: Path = Path('lunar.pth')
     video_folder: Path = Path('videos')
-    results_folder: Path = Path('results')
+    results_folder: Path = Path('logs')
 
 
 def create_agent(params):
@@ -44,7 +44,7 @@ def create_agent(params):
     return agent
 
 
-def create_video(model_file='models/lunar_bs512.pth'):
+def create_video(model_file='models/lunar_small_g99.pth'):
     params = Params()
     agent = create_agent(params)
     agent.load_model(model_file)
@@ -52,17 +52,13 @@ def create_video(model_file='models/lunar_bs512.pth'):
     record_video(agent, env, params.seed, params.video_folder)
 
 
-def create_evaluator(model_file='models/lunar_small_g99.pth'):
+def evaluation(model_file='models/lunar_small_g99.pth'):
     params = Params()
     agent = create_agent(params)
     agent.load_model(model_file)
     tr, ts, lr, rpa = evaluate_model(agent)
-    print('mean rewards', np.mean(tr))
-    print('mean steps', np.mean(ts))
-    print('fails:', lr.count(-1))
-    print('success:', lr.count(0))
-    print('perfect', lr.count(1))
-    print('avg rewards per action', rpa)
+    plot_evaluation(tr, ts, lr, rpa)
+    return tr, ts, lr, rpa
 
 
 def main():
@@ -73,10 +69,3 @@ def main():
     agent = create_agent(params)
     v_envs = make_vec_env('LunarLander-v3', n_envs=params.n_envs)
     train_agent(agent, v_envs, params)
-
-    eval_env = gym.make('LunarLander-v3', render_mode='rgb_array')
-    #agent.load_model('lunar.pth')
-    evaluate_model(agent)
-
-    video_env = gym.make('LunarLander-v3', render_mode='rgb_array')
-    record_video(agent, video_env, params.seed, params.video_folder)

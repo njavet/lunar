@@ -23,9 +23,9 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-train = "lunar.main:train_small_agent"
-eval = "lunar.main:create_evaluator"
+train = "lunar.main:main"
+eval = "lunar.main:evaluation"
+plot = "lunar.vis:plot_training_results"
 t0 = "lunar.main:train_2048_agent"
-main = "lunar.main:main"
 video = "lunar.main:create_video"
 
