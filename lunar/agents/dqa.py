@@ -15,6 +15,7 @@ class DQNAgent:
                  batch_size: int,
                  memory_size: int,
                  update_target_steps: int,
+                 checkpoint_steps: int,
                  training_freq: int,
                  lr: float) -> None:
         self.dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -26,12 +27,14 @@ class DQNAgent:
         self.decay = decay
         self.batch_size = batch_size
         self.update_target_steps = update_target_steps
+        self.checkpoint_steps = checkpoint_steps
         self.training_freq = training_freq
         self.lr = lr
         self.steps = 0
         self.policy_net = None
         self.target_net = None
         self.optimizer = None
+        self.load_checkpoint()
         self.reward_normalizer = RewardNormalizer()
 
     def init_dqn(self, dqn):
@@ -42,6 +45,25 @@ class DQNAgent:
 
     def load_model(self, filename):
         self.target_net.load_state_dict(torch.load(filename))
+
+    def save_state(self):
+        torch.save({
+            'model_state_dict': self.policy_net.state_dict(),
+            'optim_state_dict': self.optimizer.state_dict(),
+            'steps': self.steps,
+            'epsilon': self.epsilon,
+        }, 'checkpoint.pth')
+
+    def load_checkpoint(self):
+        try:
+            checkpoint = torch.load('checkpoint.pth')
+            self.policy_net.load_state_dict(checkpoint['model_state_dict'])
+            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            self.steps = checkpoint['steps'] + 1
+            self.target_net.load_state_dict(self.policy_net.state_dict())
+            self.epsilon = checkpoint['epsilon']
+        except FileNotFoundError:
+            pass
 
     def epsilon_decay(self):
         self.epsilon = max(self.epsilon_min, self.epsilon * self.decay)

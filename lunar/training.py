@@ -22,6 +22,8 @@ def train_dqa(agent, env, params):
         if step % 1000 == 0:
             gc.collect()
             tracker.print_logs(step, agent.epsilon, infos)
+        if step % params.checkpoint_steps == 0:
+            agent.save_state()
     torch.save(agent.target_net.state_dict(), params.model_file)
     tracker.save_logs()
 

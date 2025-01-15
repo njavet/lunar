@@ -77,6 +77,7 @@ def create_agent(params):
                      batch_size=params.batch_size,
                      memory_size=params.memory_size,
                      update_target_steps=params.update_target_steps,
+                     checkpoint_steps=params.checkpoint_steps,
                      training_freq=params.training_freq,
                      lr=params.lr)
     return agent
