@@ -4,7 +4,6 @@ import numpy as np
 from rich.console import Console
 
 # project imports
-from rai.utils.helpers import random_argmax
 
 
 class Agent:

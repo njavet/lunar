@@ -34,7 +34,6 @@ class DQNAgent:
         self.policy_net = None
         self.target_net = None
         self.optimizer = None
-        self.load_checkpoint()
         self.reward_normalizer = RewardNormalizer()
 
     def init_dqn(self, dqn):
@@ -42,6 +41,7 @@ class DQNAgent:
         self.target_net = dqn().to(self.dev)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.lr)
+        self.load_checkpoint()
 
     def load_model(self, filename):
         self.target_net.load_state_dict(torch.load(filename))
@@ -58,7 +58,7 @@ class DQNAgent:
         try:
             checkpoint = torch.load('checkpoint.pth')
             self.policy_net.load_state_dict(checkpoint['model_state_dict'])
-            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            self.optimizer.load_state_dict(checkpoint['optim_state_dict'])
             self.steps = checkpoint['steps'] + 1
             self.target_net.load_state_dict(self.policy_net.state_dict())
             self.epsilon = checkpoint['epsilon']

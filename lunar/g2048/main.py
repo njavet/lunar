@@ -11,7 +11,7 @@ from lunar.g2048.dqn import ConNet
 from lunar import Env2048
 from lunar.agents.dqa import DQNAgent
 from lunar.training import train_dqa
-
+from lunar import config
 
 
 def play_2048():

@@ -2,6 +2,7 @@ from collections import defaultdict
 import gc
 import time
 from rich.console import Console
+import json
 import torch
 import pandas as pd
 import numpy as np
@@ -24,8 +25,9 @@ def train_dqa(agent, env, params):
             tracker.print_logs(step, agent.epsilon, infos)
         if step % params.checkpoint_steps == 0:
             agent.save_state()
+            tracker.save_logs(step)
     torch.save(agent.target_net.state_dict(), params.model_file)
-    tracker.save_logs()
+    tracker.save_logs(params.max_time_steps)
 
 
 def evaluate_model(agent, env, n_episodes=10):
@@ -81,7 +83,24 @@ class Tracker:
         self.n_envs = n_envs
         self.episode_rewards = np.zeros(n_envs)
         self.episode_lengths = np.zeros(n_envs)
-        self.tiles = defaultdict(int)
+        self.tiles_devel = []
+        self.tiles = {0: 0,
+                      2: 0,
+                      4: 0,
+                      8: 0,
+                      16: 0,
+                      32: 0,
+                      64: 0,
+                      128: 0,
+                      256: 0,
+                      512: 0,
+                      1024: 0,
+                      2048: 0,
+                      4096: 0,
+                      8192: 0,
+                      16384: 0,
+                      32768: 0,
+                      65536: 0}
 
         self.epsilons = []
         self.total_rewards = []
@@ -89,13 +108,21 @@ class Tracker:
         self.mean_rewards = []
         self.mean_lengths = []
 
-    def update(self, epsilon, rewards, dones, infos):
-        self.episode_rewards += rewards
-        self.episode_lengths += 1
+    def update_tiles(self, infos):
         for info in infos:
             for tile, count in info['tiles'].items():
                 self.tiles[tile] += count
         self.tiles = {k: v / self.n_envs for k, v in self.tiles.items()}
+
+    def print_tiles(self):
+        for tile, count in self.tiles.items():
+            self.console.print(f'{str(tile).rjust(5)}: {count:.2f}')
+
+    def update(self, epsilon, rewards, dones, infos):
+        self.episode_rewards += rewards
+        self.episode_lengths += 1
+        self.update_tiles(infos)
+        self.tiles_devel.append(self.tiles)
 
         for i, done in enumerate(dones):
             if done:
@@ -107,14 +134,16 @@ class Tracker:
                 self.mean_rewards.append(np.mean(self.total_rewards))
                 self.mean_lengths.append(np.mean(self.total_lengths))
 
-    def save_logs(self):
+    def save_logs(self, step):
         data = {'total_rewards': self.total_rewards,
                 'mean_rewards': self.mean_rewards,
                 'total_lengths': self.total_lengths,
                 'mean_lengths': self.mean_lengths,
                 'epsilons': self.epsilons}
         df = pd.DataFrame(data)
-        df.to_csv('logs.csv', index=False)
+        df.to_csv(f'logs_{step}.csv', index=False)
+        with open(f'tiles_{step}.json', 'w') as f:
+            json.dump(self.tiles_devel, f, indent=2)
 
     def print_logs(self, step, epsilon, infos):
         curr_time = time.time()
@@ -124,19 +153,31 @@ class Tracker:
         self.console.print(f'steps: {step} / episodes: {len(self.total_lengths)}')
         self.console.print(f'current epsilon: {epsilon:.4f}',
                            style='#6312ff')
-        self.console.print(f'mean reward: {self.mean_reward}')
-        self.console.print(f'std reward: {self.std_reward}')
-        self.console.print(f'mean length: {self.mean_length}')
-        self.console.print(f'tiles: {self.tiles}')
+        self.console.print(f'mean reward: {self.mean_reward:.2f}')
+        self.console.print(f'std reward: {self.std_reward:.2f}')
+        self.console.print(f'mean length: {self.mean_length:.2f}')
+        self.print_tiles()
 
     @property
     def mean_reward(self):
-        return np.mean(self.total_rewards[-self.window_size:])
+        rlst = self.total_rewards[-self.window_size]
+        if rlst:
+            return np.mean(rlst)
+        else:
+            return 0
 
     @property
     def mean_length(self):
-        return np.mean(self.total_lengths[-self.window_size:])
+        rlst = self.total_lengths[-self.window_size]
+        if rlst:
+            return np.mean(rlst)
+        else:
+            return 0
 
     @property
     def std_reward(self):
-        return np.std(self.total_rewards[-self.window_size:])
+        rlst = self.total_rewards[-self.window_size]
+        if rlst:
+            return np.std(rlst)
+        else:
+            return 0
