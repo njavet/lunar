@@ -6,54 +6,86 @@ import torch.nn as nn
 import torch.optim as optim
 
 
-class DQNAgent:
+class Agent:
     def __init__(self,
-                 dqn: nn.Module,
                  gamma: float,
                  epsilon: float,
                  epsilon_min: float,
+                 max_time_steps: int,
                  decay: float,
                  batch_size: int,
                  memory_size: int,
                  update_target_steps: int,
+                 training_freq: int,
                  lr: float) -> None:
         self.dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.policy_net = dqn().to(self.dev)
-        self.target_net = dqn().to(self.dev)
-        self.target_net.load_state_dict(self.policy_net.state_dict())
         self.memory = ReplayMemory(self.dev, memory_size=memory_size)
-        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=lr)
-        self.batch_size = batch_size
-        self.update_target_steps = update_target_steps
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
-        self.decay = decay
+        self.max_time_steps = max_time_steps
+        self.decay = self.set_epsilon_decay(decay)
+        self.batch_size = batch_size
+        self.update_target_steps = update_target_steps
+        self.training_freq = training_freq
+        self.lr = lr
         self.steps = 0
+        self.policy_net = ConNet().to(self.dev)
+        self.target_net = ConNet().to(self.dev)
+        self.target_net.load_state_dict(self.policy_net.state_dict())
+        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.lr)
+
+    def load_model(self, filename):
+        self.target_net.load_state_dict(torch.load(filename))
+
+    def set_epsilon_decay(self, decay):
+        if decay is None:
+            decay = np.exp(np.log(self.epsilon_min) / self.max_time_steps)
+        return decay
+
+    def epsilon_decay(self):
+        self.epsilon = max(self.epsilon_min, self.epsilon * self.decay)
+
+    def optimal_policy(self, states):
+        states = torch.tensor(states, dtype=torch.float32, device=self.dev)
+        with torch.no_grad():
+            q_values = self.target_net(states)
+        try:
+            actions = q_values.argmax(dim=1)
+        except IndexError:
+            actions = q_values.argmax()
+        return actions.cpu().numpy()
 
     def select_actions(self, states):
         if random.random() < self.epsilon:
-            return np.random.randint(4, size=len(states))
+            action = torch.randint(0, 4, (len(states),), device=self.dev)
+            return action.cpu().numpy()
         states = torch.tensor(states, dtype=torch.float32, device=self.dev)
         with torch.no_grad():
             q_values = self.policy_net(states)
-        actions = q_values.argmax(dim=1).detach().cpu().numpy()
-        return actions
+        actions = q_values.argmax(dim=1)
+        return actions.cpu().numpy()
 
     def learn(self):
         self.steps += 1
         if len(self.memory) < self.batch_size:
             return
-        states, actions, rewards, next_states, dones = self.memory.sample(self.batch_size)
+        if self.steps % self.training_freq != 0:
+            return
+        states, actions, rewards, next_states, dones = self.memory.sample(
+            self.batch_size
+        )
         q_values = self.policy_net(states).gather(1, actions).squeeze()
         with torch.no_grad():
             next_q_values = self.target_net(next_states).max(1)[0]
-        expected_q_values = rewards + (self.gamma * next_q_values * (1 - dones))
+            next_q_values *= (1 - dones)
+        expected_q_values = rewards + self.gamma * next_q_values
         loss = torch.nn.functional.mse_loss(q_values, expected_q_values)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-        self.epsilon = max(self.epsilon * self.decay, self.epsilon_min)
+        self.epsilon_decay()
+        return loss.item()
 
     def store_transitions(self, states, actions, rewards, next_states, dones):
         self.memory.push(states, actions, rewards, next_states, dones)
@@ -69,8 +101,7 @@ class ReplayMemory:
 
     def push(self, states, actions, rewards, next_states, dones):
         transitions = zip(states, actions, rewards, next_states, dones)
-        for transition in transitions:
-            self.memory.append(transition)
+        self.memory.extend(list(transitions))
 
     def sample(self, batch_size):
         batch = random.sample(self.memory, batch_size)
@@ -95,38 +126,23 @@ class ReplayMemory:
     def __len__(self):
         return len(self.memory)
 
-"""
-    def replay(self):
-        if len(self.memory) < self.batch_size:
-            return
-        batch = random.sample(self.memory, self.batch_size)
-        states, actions, rewards, next_states, dones = map(
-            lambda x: torch.stack(x).to(self.device),
-            zip(*batch)
+
+class ConNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(16, 64, kernel_size=3),
+            nn.ReLU(),
+            nn.Conv2d(64, 128, kernel_size=3),
+            nn.ReLU()
+        )
+        self.fc = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(128 * 4 * 4, 256),
+            nn.ReLU(),
+            nn.Linear(256, 4)
         )
 
-        q_values = self.model(states)
-        with torch.no_grad():
-            next_q_values = self.target_model(next_states)
-            max_next_q_values = torch.max(next_q_values, dim=1)[0]
-
-        targets = q_values.clone()
-        for i in range(self.batch_size):
-            targets[i, actions[i]] = rewards[i] if dones[i] else rewards[i] + self.gamma * max_next_q_values[i]
-
-        self.optimizer.zero_grad()
-        loss = self.criterion(q_values, targets)
-        loss.backward()
-        self.optimizer.step()
-
-    def save_checkpoint(self, episode, filename='checkpoint.pth'):
-        torch.save({
-            'model_state_dict': self.model.state_dict(),
-            'target_model_state_dict': self.target_model.state_dict(),
-            'optimizer_state_dict': self.optimizer.state_dict(),
-            'memory': self.memory,
-            'episode': episode,
-            'epsilon': self.epsilon
-        }, filename)
-
-"""
+    def forward(self, x):
+        x = self.conv(x)
+        return self.fc(x)

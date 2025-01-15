@@ -19,18 +19,21 @@ class Env2048(gym.Env):
         self.action_space = Discrete(4)
         self.board = np.zeros((4, 4))
         self.score = 0
+        self.max_tile = 0
         self.window_size = 512
         self.window = None
         self.clock = None
+        self.corners = self.board[[0, 0, 3, 3], [0, 3, 0, 3]]
 
     def get_obs(self):
         return state.board_to_state(self.board)
 
     def get_info(self):
-        return {'score': self.score}
+        return {'score': self.score, 'max_tile': self.max_tile}
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
+        self.max_tile = 0
         self.board = np.zeros((4, 4), dtype=np.int64)
         self.score = 0
         self.board = state.add_random_tile(self.board)
@@ -50,6 +53,9 @@ class Env2048(gym.Env):
 
         if not np.array_equal(self.board, new_board):
             self.board = state.add_random_tile(new_board)
+            self.max_tile = np.max(self.board)
+            # in_corner = np.any(self.corners == self.max_tile)
+            # zeros = 16 - np.count_nonzero(self.board)
             reward = score + 1
         else:
             reward = -1
@@ -90,6 +96,7 @@ class Env2048(gym.Env):
         for i, row in enumerate(self.board):
             for j, cell in enumerate(row):
                 cell = int(cell)
+
                 color = config.TILE_COLORS.get(cell, config.TILE_COLORS[4096])
                 # different coordinate system
                 x = config.GAP_SIZE + j * cell_size + 2
@@ -124,7 +131,7 @@ class Env2048(gym.Env):
                 width=3,
             )
 
-        if self.render_mode == 'uhuman':
+        if self.render_mode == 'human':
             # The following line copies our drawings from `canvas`
             # to the visible window
             self.window.blit(canvas, canvas.get_rect())

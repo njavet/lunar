@@ -1,21 +1,28 @@
 from pydantic import BaseModel
+from pathlib import Path
 
 
 class Params(BaseModel):
-    obs_dim: int = 256
-    action_dim: int = 4
-    gamma: float = 0.99
+    n_envs: int = 256
+    gamma: float = 1.0
     epsilon: float = 1.0
     epsilon_min: float = 0.01
-    decay: float = 0.999
-    batch_size: int = 512
-    memory_size: int = 5000000
+    max_time_steps: int = 1000000
+    decay: float | None = None
+    batch_size: int = 1024
+    memory_size: int = 10000000
     update_target_steps: int = 1024
-    lr: float = 0.0005
+    training_freq: int = 1
+    lr: float = 5e-4
+    seed: int = 0x101
+    eval_episodes: int = 10
+    model_file: Path = Path('g2048.pth')
+    video_folder: Path = Path('videos')
+    results_folder: Path = Path('logs')
 
 
 TILE_COLORS = {
-    0: '#ffffff',     # Empty tile
+    0: '#ffffff',
     2: '#d5c7ff',
     4: '#c1adff',
     8: '#a384ff',
@@ -35,4 +42,3 @@ GAP_SIZE = 8
 WIDTH = 4 * TILE_SIZE + 5 * GAP_SIZE + 32
 HEIGHT = WIDTH + 200
 FONT_COLOR = 'black'
-

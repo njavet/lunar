@@ -102,7 +102,7 @@ def game_over(board: np.ndarray) -> bool:
 
 
 def add_random_tile(board: np.ndarray) -> np.ndarray:
-    r, c = np.where(board == 0)
+    r, c = random.choice(np.argwhere(board == 0))
     new_board = board.copy()
     new_board[r, c] = 2 if random.random() < 0.9 else 4
     return new_board

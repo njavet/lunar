@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 
 # project imports
-from rla2048.fts import merge_left, merge_down, merge_right, merge_up
+from rla2048.core.state import merge_left, merge_down, merge_right, merge_up
 
 
 class TestMerge(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestMerge(unittest.TestCase):
                               [0, 0, 0, 32]])
 
     def test_merge_left_grid0(self):
-        grid, _ = merge_left(self.grid0)
+        grid = merge_left(self.grid0)
         grid_res = np.array([[4, 4, 0, 0],
                              [8, 0, 0, 0],
                              [2, 4, 8, 16],
