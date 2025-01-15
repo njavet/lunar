@@ -11,7 +11,7 @@ import numpy as np
 def train_dqa(agent, env, params):
     tracker = Tracker(params.n_envs, window_size=1000)
     states = env.reset()
-    for step in range(params.max_time_steps):
+    for step in range(agent.steps, params.max_time_steps):
         actions = agent.select_actions(states)
         next_states, rewards, dones, infos = env.step(actions)
         agent.store_transitions(states, actions, rewards, next_states, dones)
@@ -112,17 +112,18 @@ class Tracker:
         for info in infos:
             for tile, count in info['tiles'].items():
                 self.tiles[tile] += count
-        self.tiles = {k: v / self.n_envs for k, v in self.tiles.items()}
 
     def print_tiles(self):
         for tile, count in self.tiles.items():
-            self.console.print(f'{str(tile).rjust(5)}: {count:.2f}')
+            avg_count = count / self.n_envs
+            self.console.print(f'{str(tile).rjust(5)}: {avg_count:.2f}')
 
     def update(self, epsilon, rewards, dones, infos):
         self.episode_rewards += rewards
         self.episode_lengths += 1
         self.update_tiles(infos)
-        self.tiles_devel.append(self.tiles)
+        tiles = {k: v / self.n_envs for k, v in self.tiles.items()}
+        self.tiles_devel.append(tiles)
 
         for i, done in enumerate(dones):
             if done:
@@ -160,7 +161,7 @@ class Tracker:
 
     @property
     def mean_reward(self):
-        rlst = self.total_rewards[-self.window_size]
+        rlst = self.total_rewards[-self.window_size:]
         if rlst:
             return np.mean(rlst)
         else:
@@ -168,7 +169,7 @@ class Tracker:
 
     @property
     def mean_length(self):
-        rlst = self.total_lengths[-self.window_size]
+        rlst = self.total_lengths[-self.window_size:]
         if rlst:
             return np.mean(rlst)
         else:
@@ -176,7 +177,7 @@ class Tracker:
 
     @property
     def std_reward(self):
-        rlst = self.total_rewards[-self.window_size]
+        rlst = self.total_rewards[-self.window_size:]
         if rlst:
             return np.std(rlst)
         else:
