@@ -81,7 +81,7 @@ class Tracker:
         self.start_t = time.time()
         self.window_size = window_size
         self.n_envs = n_envs
-        self.completed_games = 1
+        self.completed_games = np.ones(n_envs)
         self.episode_rewards = np.zeros(n_envs)
         self.episode_lengths = np.zeros(n_envs)
         self.tiles_devel = []
@@ -130,7 +130,7 @@ class Tracker:
 
         for i, done in enumerate(dones):
             if done:
-                self.completed_games += 1
+                self.completed_games[i] += 1
                 self.total_rewards.append(self.episode_rewards[i])
                 self.total_lengths.append(self.episode_lengths[i])
                 self.epsilons.append(epsilon)

@@ -17,7 +17,7 @@ class Env2048(gym.Env):
         self.render_mode = render_mode
         self.observation_space = Box(low=0, high=1, shape=(16, 4, 4))
         self.action_space = Discrete(4)
-        self.board = np.zeros((4, 4), dtype=np.float32)
+        self.board = np.zeros((4, 4), dtype=np.uint32)
         self.score = 0
         self.window_size = 512
         self.window = None
@@ -33,7 +33,7 @@ class Env2048(gym.Env):
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self.board = np.zeros((4, 4))
+        self.board.fill(0)
         self.score = 0
         self.board = state.add_random_tile(self.board)
         self.board = state.add_random_tile(self.board)
