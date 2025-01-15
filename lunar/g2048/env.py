@@ -17,8 +17,7 @@ class Env2048(gym.Env):
         self.render_mode = render_mode
         self.observation_space = Box(low=0, high=1, shape=(16, 4, 4))
         self.action_space = Discrete(4)
-        self.board = np.zeros((4, 4))
-        self.state = np.zeros((16, 4, 4), dtype=np.float32)
+        self.board = np.zeros((4, 4), dtype=np.float32)
         self.score = 0
         self.window_size = 512
         self.window = None
@@ -26,7 +25,7 @@ class Env2048(gym.Env):
         self.corners = self.board[[0, 0, 3, 3], [0, 3, 0, 3]]
 
     def get_obs(self):
-        return state.board_to_state(self.state, self.board)
+        return state.board_to_state(self.board)
 
     def get_info(self):
         return {'score': self.score,

@@ -69,8 +69,7 @@ class DQNAgent:
         self.epsilon = max(self.epsilon_min, self.epsilon * self.decay)
 
     def optimal_policy(self, states):
-        states = torch.tensor(states,
-                              dtype=torch.float32).to(self.dev, non_blocking=True)
+        states = torch.tensor(states, dtype=torch.float32, device=self.dev)
         with torch.no_grad():
             q_values = self.target_net(states)
         try:
@@ -81,11 +80,9 @@ class DQNAgent:
 
     def select_actions(self, states):
         if random.random() < self.epsilon:
-            action = torch.randint(0, 4, (len(states),)).to(device=self.dev,
-                                                            non_blocking=True)
-            return action.cpu().numpy()
-        states = torch.tensor(states, dtype=torch.float32).to(device=self.dev,
-                                                              non_blocking=True)
+            action = np.random.randint(0, 4, len(states))
+            return action
+        states = torch.tensor(states, dtype=torch.float32, device=self.dev)
         with torch.no_grad():
             q_values = self.policy_net(states)
         actions = q_values.argmax(dim=1)
@@ -138,8 +135,8 @@ class ReplayMemory:
         batch = random.sample(self.memory, batch_size)
         states, actions, rewards, next_states, dones = zip(*batch)
         states = torch.tensor(np.array(states),
-                              dtype=torch.float32).to(self.device,
-                                                      non_blocking=True)
+                              dtype=torch.float32,
+                              device=self.device)
         actions = torch.tensor(np.array(actions),
                                dtype=torch.long,
                                device=self.device).unsqueeze(1)

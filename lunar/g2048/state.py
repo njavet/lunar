@@ -17,12 +17,13 @@ def state_to_board(state: np.ndarray, board: np.ndarray):
     board[rs, cs] = values
 
 
-def board_to_state(state: np.ndarray, board: np.ndarray):
+def board_to_state(board: np.ndarray) -> np.ndarray:
     # TODO move back to log-1 (since the first grid is always zero)
-    state.fill(0)
+    state = np.zeros((16, 4, 4), dtype=np.float32)
     rs, cs = np.where(board != 0)
     one_hot = np.log2(board[rs, cs]).astype(np.uint8)
     state[one_hot, rs, cs] = 1
+    return state
 
 
 def shift_left(board: np.ndarray) -> np.ndarray:
