@@ -48,7 +48,7 @@ def get_params():
     epsilon_min = 0.01
     max_time_steps = 1000000
     decay = np.exp(np.log(epsilon_min) / max_time_steps)
-    params = config.Params(n_envs=128,
+    params = config.Params(n_envs=64,
                            gamma=1,
                            epsilon=1,
                            epsilon_min=epsilon_min,
