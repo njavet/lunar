@@ -13,6 +13,10 @@ def train_agent(agent, env, params):
     for step in range(params.max_time_steps):
         actions = agent.select_actions(states)
         next_states, rewards, dones, infos = env.step(actions)
+        max_tiles = [info['max_tile'] for info in infos]
+        max_tile = max(max_tiles)
+        occ = max_tiles.count(max_tile)
+
         agent.store_transitions(states, actions, rewards, next_states, dones)
         agent.learn()
         states = next_states
@@ -22,6 +26,7 @@ def train_agent(agent, env, params):
         if step % 1000 == 0:
             gc.collect()
             tracker.print_logs(step, agent.epsilon)
+            print('Max Tile:', max_tile, 'Occ', occ)
     torch.save(agent.target_net.state_dict(), params.model_file)
     tracker.save_logs()
 

@@ -85,7 +85,6 @@ class Agent:
         loss.backward()
         self.optimizer.step()
         self.epsilon_decay()
-        print('self.epsilon', self.epsilon)
         return loss.item()
 
     def store_transitions(self, states, actions, rewards, next_states, dones):
@@ -132,9 +131,9 @@ class ConNet(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv = nn.Sequential(
-            nn.Conv2d(16, 64, kernel_size=3),
+            nn.Conv2d(16, 64, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(64, 128, kernel_size=3),
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
             nn.ReLU()
         )
         self.fc = nn.Sequential(
