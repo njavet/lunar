@@ -59,4 +59,5 @@ def create_agent(params):
 def lunar():
     params = get_params()
     agent = create_agent(params)
+    agent.init_dqn(LargeLunarDQN)
 
