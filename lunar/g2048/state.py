@@ -34,6 +34,7 @@ def board_to_state_func(board: np.ndarray) -> np.ndarray:
     state[one_hot, rs, cs] = 1
     return state
 
+
 def shift_left(board: np.ndarray) -> np.ndarray:
     # TODO shift and merge without converting to board
     shifted_board = np.array([np.pad(row[row != 0],
@@ -43,6 +44,14 @@ def shift_left(board: np.ndarray) -> np.ndarray:
 
 
 def merge_left(board: np.ndarray) -> np.ndarray:
+    shifted = shift_left(board)
+    mask = (shifted[:, :-1] == shifted[:, 1:]) & (shifted[:, :-1] != 0)
+    shifted[:, :-1][mask] *= 2
+    shifted[:, 1:][mask] = 0
+    return shift_left(shifted)
+
+
+def merge_left_func(board: np.ndarray) -> np.ndarray:
     shifted = shift_left(board)
     merged = shifted.copy()
     mask = (shifted[:, :-1] == shifted[:, 1:]) & (shifted[:, :-1] != 0)
