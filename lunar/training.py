@@ -115,7 +115,7 @@ class Tracker:
 
     def print_tiles(self):
         for tile, count in self.tiles.items():
-            avg_count = count / self.episode_lengths
+            avg_count = count / (len(self.total_lengths) + 1)
             tile_str = str(tile).rjust(5)
             count_str = str(count).rjust(8)
             self.console.print(f'{tile_str}: {count_str} / {avg_count:.4f}')
@@ -124,7 +124,7 @@ class Tracker:
         self.episode_rewards += rewards
         self.episode_lengths += 1
         self.update_tiles(infos)
-        tiles = {k: v / self.episode_lengths for k, v in self.tiles.items()}
+        tiles = {k: v / (len(self.total_lengths) + 1) for k, v in self.tiles.items()}
         self.tiles_devel.append(tiles)
 
         for i, done in enumerate(dones):

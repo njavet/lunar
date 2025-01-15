@@ -56,14 +56,15 @@ class DQNAgent:
 
     def load_checkpoint(self):
         try:
-            checkpoint = torch.load('checkpoint.pth')
+            checkpoint = torch.load('checkpoint.pth', map_location=self.dev)
             self.policy_net.load_state_dict(checkpoint['model_state_dict'])
             self.optimizer.load_state_dict(checkpoint['optim_state_dict'])
             self.steps = checkpoint['steps'] + 1
             self.target_net.load_state_dict(self.policy_net.state_dict())
             self.epsilon = checkpoint['epsilon']
+            print('checkpoint loaded...')
         except FileNotFoundError:
-            pass
+            print('no checkpoint found ...')
 
     def epsilon_decay(self):
         self.epsilon = max(self.epsilon_min, self.epsilon * self.decay)
